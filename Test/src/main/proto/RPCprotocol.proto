@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.item.test.protocol.RPCProtocol";
+option java_outer_classname = "RPCProtocolProto";
+
+option objc_class_prefix = "HLW";
+
+
+package RPCProtocol;
+
+// rpc 协议, 抄袭dubbo
+message RPCProtocol{
+
+  // 标识协议
+  string magicHigh = 1;
+
+  //版本号
+  string  magicLow = 2;
+
+  // 标识是请求或响应。请求： 1; 响应： 0
+  sint32 req_Res = 3;
+
+  // 仅在 Req/Res 为1（请求）时才有用，标记是否期望从服务器返回值。如果需要来自服务器的返回值，则设置为1。一般应用发送的请求都是1。
+  sint32 way = 4;
+
+  // 标识是否是事件消息，例如，心跳事件。如果这是一个事件，则设置为1。
+  sint32 event = 5;
+
+  // 标识序列化类型：比如 fastjson 的值为6。
+  bytes serializationID = 6;
+
+  // 仅在 Req/Res 为0（响应）时有用，用于标识响应的状态。
+  Status status = 7;
+
+  // 仅在 Req/Res 为0（响应）时有用，用于标识响应的状态。
+  sint64 requestID = 8;
+
+  // 序列化后的内容长度（标识协议体的长度），按字节计数。int类型。
+  sint32 dataLength = 9;
+
+  //  string body = 10;
+  Body body = 10;
+
+  enum Status{
+    OK = 0;
+    CLIENT_TIMEOUT = 1;
+    SERVER_TIMEOUT = 2;
+    BAD_REQUEST = 3;
+    BAD_RESPONSE = 4;
+    SERVICE_NOT_FOUND = 5;
+    SERVICE_ERROR = 6;
+    SERVER_ERROR = 7;
+    CLIENT_ERROR = 8;
+    SERVER_THREADPOOL_EXHAUSTED_ERROR = 9;
+  }
+
+  message Body{
+
+    // 空间
+    string namespace = 1;
+    /**
+     * 方法名称
+     */
+    string methodName = 2;
+    /**
+     * 参数个数
+     */
+    string params = 3;
+    /**
+     * 结果类型
+     */
+    string resultType = 4;
+    /**
+     * 方法大小
+     */
+    sint32 methodLength = 5;
+  }
+
+}

@@ -3,7 +3,6 @@ package com.item.test.dubbo;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.item.test.dubbo.demo.DemoProto;
 import com.item.test.dubbo.demo.PersonTest;
 import com.item.test.util.ProtoJsonUtils;

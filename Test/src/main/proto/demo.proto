@@ -25,7 +25,6 @@ message PersonTest {
   Sex sex = 4; // 枚举类型
   repeated PhoneNumber phone = 5; // 引用下面定义的 PhoneNumber 类型的 message
   map<string, string> tags = 6; // map 类型
-
   // 定义一个枚举
   enum Sex {
     DEFAULT = 0;

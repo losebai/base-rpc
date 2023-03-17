@@ -1,7 +1,10 @@
 package com.item.test.dubbo;
 
 
+import org.apache.dubbo.config.ProtocolConfig;
+import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.ServiceConfig;
+import org.apache.dubbo.config.bootstrap.DubboBootstrap;
 
 public class ProviderApplication {
     public static void main(String[] args) {
@@ -11,12 +14,12 @@ public class ProviderApplication {
         service.setRef(new GreetingsServiceImpl());
 
         // 启动 Dubbo
-//        DubboBootstrap.getInstance()
-//                .application("first-dubbo-provider")
-//                .registry(new RegistryConfig("zookeeper://127.0.0.1:2181"))
-//                .protocol(new ProtocolConfig("dubbo", -1))
-//                .service(service)
-//                .start()
-//                .await();
+        DubboBootstrap.getInstance()
+                .application("first-dubbo-provider")
+                .registry(new RegistryConfig("zookeeper://127.0.0.1:2181"))
+                .protocol(new ProtocolConfig("dubbo", -1))
+                .service(service)
+                .start()
+                .await();
     }
 }

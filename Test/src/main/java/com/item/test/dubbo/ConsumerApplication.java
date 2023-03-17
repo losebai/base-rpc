@@ -7,6 +7,7 @@ import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
 import org.apache.dubbo.config.bootstrap.DubboBootstrap;
+import org.apache.dubbo.rpc.service.GenericService;
 
 
 public class ConsumerApplication {
@@ -24,7 +25,13 @@ public class ConsumerApplication {
         GreetingsService service = reference.get();
         String message = service.apply("dubbo");
         System.out.println("Receive result ======> " + message);
-        System.in.read();
+//        System.in.read();
+
+        // generic invoke
+        GenericService genericService = (GenericService) service;
+        Object genericInvokeResult = genericService.$invoke("sayHello", new String[]{String.class.getName()},
+                new Object[]{"dubbo generic invoke"});
+        System.out.println(genericInvokeResult);
 
 
     }
