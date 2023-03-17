@@ -16,7 +16,7 @@
         <jdk.version>17</jdk.version>
         <smartboot.socket.version>1.6.0</smartboot.socket.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <lombok.version>1.18.20</lombok.version>
+        <lombok.version>1.18.24</lombok.version>
     </properties>
 
     <modules>

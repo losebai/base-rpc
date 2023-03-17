@@ -1,14 +1,7 @@
-/*******************************************************************************
- * Copyright (c) 2017-2021, org.smartboot. All rights reserved.
- * project name: smart-socket
- * file name: RpcProviderProcessor.java
- * Date: 2021-02-27
- * Author: sandao (zhengjunweimail@163.com)
- *
- ******************************************************************************/
-
 package com.base.rpc;
 
+import com.base.rpc.module.Request;
+import com.base.rpc.module.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartboot.socket.MessageProcessor;
@@ -30,8 +23,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class RpcProviderProcessor implements MessageProcessor<byte[]> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RpcProviderProcessor.class);
+public class ProviderProcessor implements MessageProcessor<byte[]> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProviderProcessor.class);
     private final Map<String, Object> impMap = new HashMap<String, Object>();
     private final ExecutorService pool = Executors.newCachedThreadPool();
     /**
@@ -96,10 +89,8 @@ public class RpcProviderProcessor implements MessageProcessor<byte[]> {
                     session.writeBuffer().write(data);
                     session.writeBuffer().flush();
                 }
-//                session.write(byteArrayOutputStream.toByteArray());
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+
+            } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             } finally {
                 if (objectInput != null) {

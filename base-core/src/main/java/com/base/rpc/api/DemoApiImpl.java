@@ -1,17 +1,11 @@
-/*******************************************************************************
- * Copyright (c) 2017-2021, org.smartboot. All rights reserved.
- * project name: smart-socket
- * file name: DemoApiImpl.java
- * Date: 2021-02-27
- * Author: sandao (zhengjunweimail@163.com)
- *
- ******************************************************************************/
-
 package com.base.rpc.api;
 
+
 /**
- * @author 三刀
- * @version V1.0 , 2018/7/1
+ * 演示api impl
+ *
+ * @author bai
+ * @date 2023/03/16
  */
 public class DemoApiImpl implements DemoApi {
     @Override

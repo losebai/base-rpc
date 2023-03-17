@@ -15,6 +15,7 @@ package org.smartboot.socket.buffer;
  * @author 三刀
  * @version V1.0 , 2020/4/7
  */
+@FunctionalInterface
 public interface BufferFactory {
     /**
      * 禁用状态的内存池

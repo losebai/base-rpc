@@ -1,8 +1,10 @@
 package com.base.rpc;
 
+import org.smartboot.socket.MessageProcessor;
 import org.smartboot.socket.transport.AioSession;
 
-public interface Processor<T> {
+
+public interface Processor<T> extends MessageProcessor<T> {
 
 
     /**

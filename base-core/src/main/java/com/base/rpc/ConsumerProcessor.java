@@ -1,10 +1,11 @@
 package com.base.rpc;
 
+import com.base.rpc.module.Request;
+import com.base.rpc.module.Response;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.smartboot.socket.MessageProcessor;
 import org.smartboot.socket.StateMachineEnum;
 import org.smartboot.socket.transport.AioSession;
 
@@ -23,10 +24,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 
-public class RpcConsumerProcessor implements MessageProcessor<byte[]> {
+public class ConsumerProcessor implements Processor<byte[]> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RpcConsumerProcessor.class);
-    private final Map<String, CompletableFuture<Response>> synchRespMap = new ConcurrentHashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerProcessor.class);
+    private final Map<String, CompletableFuture<Response>> syncRespMap = new ConcurrentHashMap<>();
     private final Map<Class<?>, Object> objectMap = new ConcurrentHashMap<>();
     private AioSession aioSession;
 
@@ -36,7 +37,7 @@ public class RpcConsumerProcessor implements MessageProcessor<byte[]> {
         try {
             objectInput = new ObjectInputStream(new ByteArrayInputStream(msg));
             Response resp = (Response) objectInput.readObject();
-            synchRespMap.get(resp.getUuid()).complete(resp);
+            syncRespMap.get(resp.getUuid()).complete(resp);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -82,7 +83,7 @@ public class RpcConsumerProcessor implements MessageProcessor<byte[]> {
 
     private Response sendRpcRequest(Request request) throws Exception {
         CompletableFuture<Response> rpcResponseCompletableFuture = new CompletableFuture<>();
-        synchRespMap.put(request.getUuid(), rpcResponseCompletableFuture);
+        syncRespMap.put(request.getUuid(), rpcResponseCompletableFuture);
 
         //输出消息
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

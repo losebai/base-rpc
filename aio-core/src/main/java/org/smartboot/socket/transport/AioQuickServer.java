@@ -140,19 +140,20 @@ public final class AioQuickServer {
         try {
             aioWriteCompletionHandler = new WriteCompletionHandler();
             if (bufferPool == null) {
-                this.bufferPool = config.getBufferFactory().create();
+                this.bufferPool = config.getBufferFactory().create(); // 创建内存池
                 this.innerBufferPool = bufferPool;
             }
             this.aioSessionFunction = aioSessionFunction;
             AsynchronousChannelProvider provider;
             if (config.isAioEnhance()) {
-                aioReadCompletionHandler = new ReadCompletionHandler();
+                aioReadCompletionHandler = new ReadCompletionHandler(); // 读回调
                 provider = new EnhanceAsynchronousChannelProvider();
             } else {
+                // 一个线程
                 concurrentReadCompletionHandlerExecutor = new ThreadPoolExecutor(1, 1,
                         60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
                 aioReadCompletionHandler = new ConcurrentReadCompletionHandler(new Semaphore(config.getThreadNum() - 1), concurrentReadCompletionHandlerExecutor);
-                provider = AsynchronousChannelProvider.provider();
+                provider = AsynchronousChannelProvider.provider(); // 返回此Java虚拟机调用的系统范围默认异步通道提供程序。
             }
             asynchronousChannelGroup = provider.openAsynchronousChannelGroup(config.getThreadNum(), new ThreadFactory() {
                 private byte index = 0;

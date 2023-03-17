@@ -1,4 +1,4 @@
-package com.base.rpc;
+package com.base.rpc.module;
 
 import lombok.Data;
 
