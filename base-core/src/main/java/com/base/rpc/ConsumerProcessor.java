@@ -2,6 +2,7 @@ package com.base.rpc;
 
 import com.base.rpc.module.Request;
 import com.base.rpc.module.Response;
+import com.base.rpc.processor.Processor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

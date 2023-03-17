@@ -23,6 +23,7 @@
         <module>./base-core</module>
         <module>./aio-core</module>
         <module>./aio-enhance</module>
+        <module>Test</module>
     </modules>
 
 
