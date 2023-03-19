@@ -1,16 +1,17 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "com.item.test.protocol.RPCProtocol";
-option java_outer_classname = "RPCProtocolProto";
+option java_package = "com.base.rpc.protocol.RPCProtocol";
+option java_outer_classname = "BaseProtocolProto";
 
 option objc_class_prefix = "HLW";
 
+import "google/protobuf/any.proto";
 
-package RPCProtocol;
+package com.base.BaseProtocol;
 
 // rpc 协议, 抄袭dubbo
-message RPCProtocol{
+message BaseProtocol{
 
   // 标识协议
   string magicHigh = 1;
@@ -57,24 +58,40 @@ message RPCProtocol{
 
   message Body{
 
-    // 空间
+    /**
+     * 空间
+     */
     string namespace = 1;
     /**
      * 方法名称
      */
     string methodName = 2;
     /**
-     * 参数个数
+     * 参数数组
      */
-    string params = 3;
+    repeated string paramsType = 3;
+
+    /**
+     * 参数
+     */
+    repeated google.protobuf.Any paramsObj = 4;
     /**
      * 结果类型
      */
-    string resultType = 4;
+    string resultType = 5;
     /**
      * 方法大小
      */
-    sint32 methodLength = 5;
-  }
+    sint32 methodLength = 6;
 
+    /**
+     * 返回对象
+     */
+    google.protobuf.Any return = 7;
+
+    /**
+    * 异常
+    */
+    string exception = 8;
+  }
 }

@@ -249,7 +249,7 @@ final class TcpAioSession extends AioSession {
         while (readBuffer.hasRemaining() && status == SESSION_STATUS_ENABLED) {
             Object dataEntry;
             try {
-                // todo 传入的session 毫无意义
+                // todo 传入的session 毫无意义，  解析readBuffer
                 dataEntry = ioServerConfig.getProtocol().decode(readBuffer, this);
             } catch (Exception e) {
                 messageProcessor.stateEvent(this, StateMachineEnum.DECODE_EXCEPTION, e);
@@ -279,9 +279,9 @@ final class TcpAioSession extends AioSession {
             return;
         }
 
-        byteBuf.flush();
+        byteBuf.flush(); // 写出缓冲区数据刷新Function
 
-        readBuffer.compact();
+        readBuffer.compact(); // 压缩读缓冲区
         //读缓冲区已满
         if (!readBuffer.hasRemaining()) {
             RuntimeException exception = new RuntimeException("readBuffer overflow");

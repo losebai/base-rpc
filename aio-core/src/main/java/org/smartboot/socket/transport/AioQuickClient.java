@@ -157,7 +157,7 @@ public final class AioQuickClient {
                     //连接成功则构造AIOSession对象
                     session = new TcpAioSession(connectedChannel, config, new ReadCompletionHandler(), new WriteCompletionHandler(), bufferPool.allocateBufferPage());
                     session.initSession(readBufferFactory.newBuffer(bufferPool.allocateBufferPage()));
-                    handler.completed(session, attachment);
+                    handler.completed(session, attachment); // 写处理消息
                 } catch (Exception e) {
                     failed(e, socketChannel);
                 }

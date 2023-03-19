@@ -29,6 +29,9 @@ import java.nio.ByteBuffer;
  * @version V1.0.0 2018/5/19
  */
 public interface Protocol<T> {
+
+    int INTEGER_BYTES = Integer.SIZE / Byte.SIZE;
+
     /**
      * 对于从Socket流中获取到的数据采用当前Protocol的实现类协议进行解析。
      *
@@ -37,4 +40,23 @@ public interface Protocol<T> {
      * @return 本次解码成功后封装的业务消息对象, 返回null则表示解码未完成
      */
     T decode(final ByteBuffer readBuffer, AioSession session);
+
+
+    /**
+     * 得到消息的可读长度
+     * 不可则 -1
+     * @param readBuffer 读到缓冲区
+     * @return int
+     */
+    default int getMessage(final ByteBuffer readBuffer){
+        int remaining = readBuffer.remaining(); //最多可以读取的数据的位置下标 - 读取的数据的下标；
+        if (remaining < INTEGER_BYTES) {
+            return -1;
+        }
+        int messageSize = readBuffer.getInt(readBuffer.position());
+        if (messageSize > remaining) {
+            return -1;
+        }
+        return messageSize;
+    }
 }

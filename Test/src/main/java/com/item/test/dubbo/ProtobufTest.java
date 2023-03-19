@@ -3,6 +3,8 @@ package com.item.test.dubbo;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.DescriptorProtos;
 import com.google.protobuf.Descriptors;
+
+
 import com.item.test.dubbo.demo.DemoProto;
 import com.item.test.dubbo.demo.PersonTest;
 import com.item.test.util.ProtoJsonUtils;
@@ -22,8 +24,8 @@ public class ProtobufTest {
         DescriptorProtos.FileDescriptorProto  proto =  DemoProto.getDescriptor().toProto();
 
         PersonTest.Builder personBuilder = PersonTest.newBuilder();
-        personBuilder.setName("Jet Chen");
-        personBuilder.setEmail("ckk505214992@gmail.com");
+        personBuilder.setName("bai");
+        personBuilder.setEmail("1145000687@qq.com");
         personBuilder.setSex(PersonTest.Sex.MALE);
 
         PersonTest.PhoneNumber.Builder phoneNumberBuilder =  PersonTest.PhoneNumber.newBuilder();

@@ -13,10 +13,11 @@ import java.util.concurrent.Executors;
 public class Consumer {
 
 
-    public void test() throws IOException {
+    public static void test1() throws IOException {
 
         ConsumerProcessor consumerProcessor = new ConsumerProcessor();
-        AioQuickClient consumer = new AioQuickClient("localhost", 8888, new RpcProtocol(), consumerProcessor);
+        AioQuickClient consumer = new AioQuickClient("localhost", 8888,
+                new RpcProtocol(), consumerProcessor);
         consumer.start();
 
         DemoApi demoApi = consumerProcessor.getObject(DemoApi.class);
@@ -33,7 +34,7 @@ public class Consumer {
     }
 
     public static void main(String[] args) throws  IOException {
-
+        test1();
 
     }
 
