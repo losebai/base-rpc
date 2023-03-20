@@ -1,9 +1,7 @@
 package com.base.rpc.processor;
 
-import com.base.rpc.module.Response;
-import com.base.rpc.processor.Processor;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
-import com.base.rpc.util.ClassMapperUtil;
+import com.base.rpc.util.ClassLoaderMapperUtil;
 import com.google.protobuf.Any;
 import org.smartboot.socket.transport.AioSession;
 
@@ -40,7 +38,7 @@ public class RPCProviderProcessor implements Processor<BaseProtocol> {
 
                     try {
                         for (int i = 0; i < classArray.length; i++) {
-                            Class<?> clazz = ClassMapperUtil.getClass(paramClassList[i]);
+                            Class<?> clazz = ClassLoaderMapperUtil.getClass(paramClassList[i]);
                             if (clazz == null) {
                                 classArray[i] = Class.forName(paramClassList[i]);
                             } else {
@@ -52,14 +50,14 @@ public class RPCProviderProcessor implements Processor<BaseProtocol> {
                     }
 
                     // 调用接口
-                    Object impObj = impMap.get(req.getInterfaceClass());
-                    if (impObj == null) {
-                        throw new UnsupportedOperationException("can not find interface: " + req.getInterfaceClass());
-                    }
-                    Method method = impObj.getClass().getMethod(req.getMethod(), classArray);
-                    Object obj = method.invoke(impObj, paramObjList); // run
-                    resp.setReturnObject(obj); // return
-                    resp.setReturnType(method.getReturnType().getName()); // return type
+//                    Object impObj = ClassLoaderMapperUtil.getClass(req.getInterfaceClass());
+//                    if (impObj == null) {
+//                        throw new UnsupportedOperationException("can not find interface: " + req.getInterfaceClass());
+//                    }
+//                    Method method = impObj.getClass().getMethod(req.getMethod(), classArray);
+//                    Object obj = method.invoke(impObj, paramObjList); // run
+//                    resp.setReturnObject(obj); // return
+//                    resp.setReturnType(method.getReturnType().getName()); // return type
 
                 }
         );
