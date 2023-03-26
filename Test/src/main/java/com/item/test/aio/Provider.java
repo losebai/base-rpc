@@ -1,6 +1,7 @@
 
 package com.item.test.aio;
 
+import com.base.core.util.InstanceBufferPool;
 import com.base.rpc.Protocol.RPCBaseProtocol;
 import com.base.rpc.ProviderProcessor;
 import com.base.rpc.api.DemoApi;
@@ -25,7 +26,9 @@ public class Provider {
 
     public static void test2() throws IOException {
         RPCProviderProcessor providerProcessor = new RPCProviderProcessor();
+
         AioQuickServer server = new AioQuickServer(8888, new RPCBaseProtocol(), providerProcessor);
+        providerProcessor.publishService(DemoApi.class, new DemoApiImpl());
         server.start();
 
     }

@@ -2,6 +2,7 @@ package com.item.test.aio;
 
 import com.base.rpc.ConsumerProcessor;
 import com.base.rpc.Protocol.RPCBaseProtocol;
+import com.base.rpc.ProviderProcessor;
 import com.base.rpc.api.DemoApi;
 import com.base.rpc.Protocol.RpcProtocol;
 import com.base.rpc.processor.RPCConsumerProcessor;
@@ -16,7 +17,26 @@ import java.util.concurrent.Executors;
 public class Consumer {
 
 
-    public static void test1() throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static void test1() throws Exception {
+
+        ConsumerProcessor consumerProcessor = new ConsumerProcessor();
+        AioQuickClient consumer = new AioQuickClient("localhost", 8888,
+                new RpcProtocol(), consumerProcessor);
+        consumer.start();
+
+        DemoApi demoApi = consumerProcessor.getObject(DemoApi.class);
+        ExecutorService pool= Executors.newCachedThreadPool();
+        pool.execute(()->{
+            System.out.println(demoApi.test("smart-socket"));
+        });
+        pool.execute(()->{
+            System.out.println(demoApi.test("smart-socket2"));
+        });
+        pool.execute(()->{
+            System.out.println(demoApi.sum(1, 2));
+        });
+    }
+    public static void test2() throws Exception {
 
         RPCConsumerProcessor consumerProcessor = new RPCConsumerProcessor();
         AioQuickClient consumer = new AioQuickClient("localhost", 8888,
@@ -36,8 +56,8 @@ public class Consumer {
         });
     }
 
-    public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        test1();
+    public static void main(String[] args) throws Exception {
+        test2();
 
     }
 

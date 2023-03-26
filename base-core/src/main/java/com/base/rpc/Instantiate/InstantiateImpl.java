@@ -20,9 +20,12 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
 
     private byte[] bytes = null;
 
-    public InstantiateImpl(BaseProtocol baseProtocol){
+    private final Object impObj;
+
+    public InstantiateImpl(BaseProtocol baseProtocol, Object impObj){
         this.baseProtocol = baseProtocol.toBuilder();
         this.body = baseProtocol.getBody().toBuilder();
+        this.impObj = impObj;
         try {
             ClassLoaderMapperUtil.addClass(body.getClassName().toStringUtf8());
         } catch (ClassNotFoundException e){
@@ -52,13 +55,6 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
             throw new RuntimeException(e);
         }
 
-        // 调用接口
-        Object impObj = ClassLoaderMapperUtil.getClass(body.getClassName().toStringUtf8());
-        if (impObj == null) {
-            String e = " can not find interface: " + body.getClassName();
-            body.setException(ByteString.copyFromUtf8(e));
-            throw new RuntimeException(e);
-        }
 
         Method method = impObj.getClass().getMethod(body.getMethodName().toStringUtf8(), classArray);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

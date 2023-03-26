@@ -1,21 +1,17 @@
 package com.base.rpc.processor;
 
 import com.base.core.util.ByteStringUtil;
+import com.base.core.util.InstanceBufferPool;
 import com.base.rpc.Protocol.RpcInvocationHandler;
 import com.base.rpc.Protocol.RpcProxyInvocationHandler;
-import com.base.rpc.module.Request;
-import com.base.rpc.module.Response;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
 import com.google.protobuf.ByteString;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.smartboot.socket.StateMachineEnum;
 import org.smartboot.socket.transport.AioSession;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.net.SocketTimeoutException;
 import java.util.Map;
@@ -31,6 +27,8 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
     private final Map<ByteString, CompletableFuture<BaseProtocol.Body>> syncRespMap = new ConcurrentHashMap<>();
     private AioSession aioSession;
 
+    private final InstanceBufferPool<Object> instanceBufferPool  = new InstanceBufferPool<Object>();
+
     @Override
     public void process(AioSession session, BaseProtocol msg) {
         syncRespMap.get(msg.getRequestID()).complete(msg.getBody());
@@ -39,9 +37,13 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
 
     public <T> T getObject(final Class<T> remoteInterface) throws Exception {
 
-        T classObj = remoteInterface.getDeclaredConstructor().newInstance();
-        RpcProxyInvocationHandler<T> rpcProxyInvocationHandler = new RpcInvocationHandler<>(classObj);
-        Object obj = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{remoteInterface},
+        Object obj = instanceBufferPool.get(remoteInterface.getName());
+        if (obj != null) {
+            return (T) obj;
+        }
+
+        RpcProxyInvocationHandler<Object> rpcProxyInvocationHandler = new RpcInvocationHandler<>(obj);
+        obj = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{remoteInterface},
                 rpcProxyInvocationHandler);
 
         BaseProtocol.Builder builder =  BaseProtocol.newBuilder();
@@ -51,6 +53,7 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
         builder.setRequestID(ByteString.copyFromUtf8(UUID.randomUUID().toString()));
         BaseProtocol baseProtocol = builder.build();
         sendRpcRequest(baseProtocol);
+        instanceBufferPool.put(remoteInterface.getName(), obj);
         return (T) obj;
     }
 
@@ -69,7 +72,7 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
             aioSession.writeBuffer().flush();
         }
         try {
-            return rpcResponseCompletableFuture.get(3, TimeUnit.SECONDS);
+            return rpcResponseCompletableFuture.get(300, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new SocketTimeoutException("Message is timeout!");
         }

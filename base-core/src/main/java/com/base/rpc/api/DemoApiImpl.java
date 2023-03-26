@@ -8,6 +8,10 @@ package com.base.rpc.api;
  * @date 2023/03/16
  */
 public class DemoApiImpl implements DemoApi {
+
+    public DemoApiImpl(){
+
+    }
     @Override
     public String test(String name) {
         try {
