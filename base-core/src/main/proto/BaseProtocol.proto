@@ -10,14 +10,14 @@ import "google/protobuf/any.proto";
 
 package com.base.BaseProtocol;
 
-// rpc 协议, 抄袭dubbo
+// rpc 协议
 message BaseProtocol{
 
   // 标识协议
-  string magicHigh = 1;
+  bytes magicHigh = 1;
 
   //版本号
-  string  magicLow = 2;
+  bytes  magicLow = 2;
 
   // 标识是请求或响应。请求： 1; 响应： 0
   sint32 req_Res = 3;
@@ -34,8 +34,8 @@ message BaseProtocol{
   // 仅在 Req/Res 为0（响应）时有用，用于标识响应的状态。
   Status status = 7;
 
-  // 仅在 Req/Res 为0（响应）时有用，用于标识响应的状态。
-  sint64 requestID = 8;
+  // 请求ID
+  bytes requestID = 8;
 
   // 序列化后的内容长度（标识协议体的长度），按字节计数。int类型。
   sint32 dataLength = 9;
@@ -61,37 +61,41 @@ message BaseProtocol{
     /**
      * 空间
      */
-    string namespace = 1;
+    bytes namespace = 1;
+
+    /**
+     * 类名
+     */
+    bytes className = 2;
     /**
      * 方法名称
      */
-    string methodName = 2;
+    bytes methodName = 3;
     /**
      * 参数数组
      */
-    repeated string paramsType = 3;
-
+    repeated bytes paramsType = 4;
     /**
      * 参数
      */
-    repeated google.protobuf.Any paramsObj = 4;
+    repeated google.protobuf.Any paramsObj = 5;
     /**
      * 结果类型
      */
-    string resultType = 5;
+    bytes resultType = 6;
     /**
      * 方法大小
      */
-    sint32 methodLength = 6;
+    sint32 methodLength = 7;
 
     /**
      * 返回对象
      */
-    google.protobuf.Any return = 7;
+    google.protobuf.Any return = 8;
 
     /**
     * 异常
     */
-    string exception = 8;
+    bytes exception = 9;
   }
 }

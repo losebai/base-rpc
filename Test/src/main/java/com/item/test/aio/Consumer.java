@@ -1,11 +1,14 @@
 package com.item.test.aio;
 
 import com.base.rpc.ConsumerProcessor;
+import com.base.rpc.Protocol.RPCBaseProtocol;
 import com.base.rpc.api.DemoApi;
 import com.base.rpc.Protocol.RpcProtocol;
+import com.base.rpc.processor.RPCConsumerProcessor;
 import org.smartboot.socket.transport.AioQuickClient;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -13,11 +16,11 @@ import java.util.concurrent.Executors;
 public class Consumer {
 
 
-    public static void test1() throws IOException {
+    public static void test1() throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
-        ConsumerProcessor consumerProcessor = new ConsumerProcessor();
+        RPCConsumerProcessor consumerProcessor = new RPCConsumerProcessor();
         AioQuickClient consumer = new AioQuickClient("localhost", 8888,
-                new RpcProtocol(), consumerProcessor);
+                new RPCBaseProtocol(), consumerProcessor);
         consumer.start();
 
         DemoApi demoApi = consumerProcessor.getObject(DemoApi.class);
@@ -33,7 +36,7 @@ public class Consumer {
         });
     }
 
-    public static void main(String[] args) throws  IOException {
+    public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         test1();
 
     }

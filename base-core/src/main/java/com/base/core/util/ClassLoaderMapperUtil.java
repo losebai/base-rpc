@@ -1,6 +1,7 @@
-package com.base.rpc.util;
+package com.base.core.util;
 
 
+import cn.hutool.core.lang.ClassScanner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -20,17 +21,13 @@ public class ClassLoaderMapperUtil {
     /**
      * 基础数据类型
      */
-    private static final Map<String, Class<?>> primitiveClassPoolPool = new ConcurrentHashMap<>();
+    private static final Map<String, Class<?>> primitiveClassPool = new ConcurrentHashMap<>(32);
     static {
-        try {
-            addClassPackage("com.item", false);
-        } catch (URISyntaxException | ClassNotFoundException | IOException e) {
-            throw new RuntimeException(e);
-        }
+        scanPackage("java.lang");
     }
 
     public static Class<?> addClass(Class<?> _class){
-        return primitiveClassPoolPool.put(_class.getSimpleName(), _class);
+        return primitiveClassPool.put(_class.getSimpleName(), _class);
     }
 
     public static Class<?> addClass(String classPath) throws ClassNotFoundException {
@@ -52,6 +49,24 @@ public class ClassLoaderMapperUtil {
             i++;
         }
         return i;
+    }
+
+    public static void scanPackage(String packagePath){
+        scanAllPackageBySuper(packagePath, null);
+    }
+
+    /**
+     * 扫描所有包
+     *
+     * @param packagePath 包路径
+     * @param superClass  超类
+     */
+    public static void scanAllPackageBySuper(String packagePath,  Class<?> superClass){
+        Set<Class<?>> classes =  ClassScanner.scanPackage(packagePath,
+                clazz -> superClass == null || superClass.isAssignableFrom(clazz) && !superClass.equals(clazz));
+        for(Class<?> _class : classes){
+            addClass(_class);
+        }
     }
 
     public static int addClassPackage(String packagePath, boolean recursion) throws URISyntaxException,
@@ -100,10 +115,10 @@ public class ClassLoaderMapperUtil {
     }
 
     public static Class<?> getClass(String key){
-        return primitiveClassPoolPool.get(key);
+        return primitiveClassPool.get(key);
     }
 
     public static void main(String[] args) {
-        System.out.println(primitiveClassPoolPool);
+        System.out.println(primitiveClassPool);
     }
 }

@@ -4,7 +4,7 @@ package com.base.rpc.api;
  * @author 三刀
  * @version V1.0 , 2018/7/1
  */
-public interface DemoApi {
+public interface                                                                                                                                                                                                                                                                                                                             DemoApi {
 
     String test(String name);
 
