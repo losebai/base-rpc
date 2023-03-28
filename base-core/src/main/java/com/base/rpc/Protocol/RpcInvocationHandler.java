@@ -1,12 +1,16 @@
 package com.base.rpc.Protocol;
 
+import com.base.rpc.Instantiate.InstantiateImpl;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Method;
+import java.util.function.Function;
 
 /**
  * rpc调用处理程序
@@ -16,18 +20,49 @@ import java.lang.reflect.Method;
  */
 public class RpcInvocationHandler<T> implements RpcProxyInvocationHandler<T> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RpcInvocationHandler.class);
     private final BaseProtocol.Body.Builder body = BaseProtocol.Body.newBuilder();
 
-    private final T target;
+    private T target;
 
-    public RpcInvocationHandler(T target){
+    private ProxyFunction<?> beforeFunc;
+
+
+    private ProxyFunction<?> afterFunc;
+
+    public RpcInvocationHandler(){
+    }
+
+    public interface ProxyFunction<R>{
+
+        /**
+         * 应用
+         *
+         * @param proxy  代理
+         * @param method 方法
+         * @param args   arg游戏
+         * @return {@link R}
+         */
+        void apply(Object proxy, Method method, Object[] args) throws Exception;
+    }
+
+    public <R> void setBeforeFunc(ProxyFunction<R> beforeFunc) {
+        this.beforeFunc = beforeFunc;
+    }
+
+    public <R> void setAfterFunc(ProxyFunction<R> afterFunc) {
+        this.afterFunc = afterFunc;
+    }
+
+    public void setTarget(T target) {
         this.target = target;
     }
 
-
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-
+        if (beforeFunc != null){
+            beforeFunc.apply(proxy, method, args);
+        }
         body.setMethodName(ByteString.copyFromUtf8(method.getName()));
         Class<?>[] types = method.getParameterTypes();
         if (types.length != args.length ){
@@ -54,7 +89,11 @@ public class RpcInvocationHandler<T> implements RpcProxyInvocationHandler<T> {
                 oos.close();
             }
         }
-        return method.invoke(target, args);
+        Object obj = method.invoke(target, args);
+        if (afterFunc != null){
+            afterFunc.apply(proxy, method, args);
+        }
+        return obj;
     }
 
     public BaseProtocol.Body getBody(){

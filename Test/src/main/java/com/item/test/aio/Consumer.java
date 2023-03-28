@@ -19,6 +19,26 @@ public class Consumer {
 
     public static void test1() throws Exception {
 
+        ConsumerProcessor consumerProcessor = new ConsumerProcessor();
+        AioQuickClient consumer = new AioQuickClient("localhost", 8888,
+                new RpcProtocol(), consumerProcessor);
+        consumer.start();
+
+        DemoApi demoApi = consumerProcessor.getObject(DemoApi.class);
+        ExecutorService pool= Executors.newCachedThreadPool();
+        pool.execute(()->{
+            System.out.println(demoApi.test("smart-socket"));
+        });
+//        pool.execute(()->{
+//            System.out.println(demoApi.test("smart-socket2"));
+//        });
+//        pool.execute(()->{
+//            System.out.println(demoApi.sum(1, 2));
+//        });
+    }
+
+    public static void test2() throws Exception {
+
         RPCConsumerProcessor consumerProcessor = new RPCConsumerProcessor();
         AioQuickClient consumer = new AioQuickClient("localhost", 8888,
                 new RPCBaseProtocol(), consumerProcessor);
@@ -29,16 +49,17 @@ public class Consumer {
         pool.execute(()->{
             System.out.println(demoApi.test("smart-socket"));
         });
-        pool.execute(()->{
-            System.out.println(demoApi.test("smart-socket2"));
-        });
-        pool.execute(()->{
-            System.out.println(demoApi.sum(1, 2));
-        });
+//        pool.execute(()->{
+//            System.out.println(demoApi.test("smart-socket2"));
+//        });
+//        pool.execute(()->{
+//            System.out.println(demoApi.sum(1, 2));
+//        });
     }
 
     public static void main(String[] args) throws Exception {
-        test1();
+//        test1();
+        test2();
 
     }
 

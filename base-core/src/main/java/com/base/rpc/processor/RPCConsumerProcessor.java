@@ -6,20 +6,20 @@ import com.base.core.util.ByteToUtil;
 import com.base.core.util.ClassLoaderMapperUtil;
 import com.base.rpc.Protocol.RpcInvocationHandler;
 import com.base.rpc.Protocol.RpcProxyInvocationHandler;
-import com.base.rpc.api.DemoApi;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
+import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.smartboot.socket.StateMachineEnum;
 import org.smartboot.socket.transport.AioSession;
 
 import java.lang.reflect.Proxy;
 import java.net.SocketTimeoutException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -30,9 +30,9 @@ import java.util.concurrent.TimeUnit;
  * @author bai
  * @date 2023/03/28
  */
+@Slf4j
 public class RPCConsumerProcessor implements Processor<BaseProtocol> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RPCConsumerProcessor.class);
     private final Map<ByteString, CompletableFuture<BaseProtocol.Body>> syncRespMap = new ConcurrentHashMap<>();
 
     private final Map<String, Object> implBuffer = new ImplBuffer<>();
@@ -42,7 +42,7 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
     @Override
     public void process(AioSession session, BaseProtocol msg) {
         syncRespMap.get(msg.getRequestID()).complete(msg.getBody());
-        System.out.println("处理消息");
+        log.info("client: " +  session.getSessionID()+  "处理消息");
     }
 
     public <T> T getObject(final Class<T> remoteInterface) throws Exception {
@@ -53,17 +53,38 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
         }
         BaseProtocol.Builder builder =  BaseProtocol.newBuilder();
         builder.setReqRes(1);
-        builder.setEvent(1);
+        builder.setEvent(0);
         builder.setMagicHigh(ByteStringUtil.ByteStringConst.magicHigh);
         builder.setRequestID(ByteString.copyFromUtf8(UUID.randomUUID().toString()));
-        BaseProtocol baseProtocol = builder.build();
-        BaseProtocol.Body body = sendRpcRequest(baseProtocol);
+        builder.setDataLength(0);
+        builder.setStatus(BaseProtocol.Status.OK);
+        builder.setMagicLow(ByteString.copyFromUtf8("v1"));
+        builder.setWay(2);
+        BaseProtocol.Body.Builder bodyBuilder = BaseProtocol.Body.newBuilder();
+        bodyBuilder.setClassName(ByteString.copyFromUtf8(remoteInterface.getName()));
+        bodyBuilder.setNamespace(ByteString.EMPTY);
+        bodyBuilder.setMethodLength(0);
+        bodyBuilder.setMethodName(ByteString.EMPTY);
+        bodyBuilder.setResultType(ByteString.EMPTY);
+        bodyBuilder.setReturn(Any.newBuilder().build());
+        builder.setBody(bodyBuilder);
 
         // newInstance
         Object returnObj =  ClassLoaderMapperUtil.getClass(remoteInterface.getName()).getDeclaredConstructor().newInstance();
+        RpcProxyInvocationHandler<Object> rpcProxyInvocationHandler = new RpcInvocationHandler<>();
+        rpcProxyInvocationHandler.setTarget(returnObj);
+        rpcProxyInvocationHandler.setBeforeFunc(
+                (p,m,a)->{
+                    bodyBuilder.setMethodName(ByteString.copyFromUtf8(m.getName()));
+                    BaseProtocol baseProtocol = builder.build();
+                    BaseProtocol.Body body = sendRpcRequest(baseProtocol);
+                    if (StringUtils.isNotEmpty(body.getException().toStringUtf8())){
+                        throw new RuntimeException(body.getException().toStringUtf8());
+                    }
+                }
+        );
 
         //proxy
-        RpcProxyInvocationHandler<Object> rpcProxyInvocationHandler = new RpcInvocationHandler<>(returnObj);
         obj = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{remoteInterface},
                 rpcProxyInvocationHandler);
         implBuffer.put(remoteInterface.getName(), obj);
@@ -71,6 +92,7 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
     }
 
     private BaseProtocol.Body sendRpcRequest(BaseProtocol request) throws Exception {
+        log.info("client : write data ");
         CompletableFuture<BaseProtocol.Body> rpcResponseCompletableFuture = new CompletableFuture<>();
         syncRespMap.put(request.getRequestID(), rpcResponseCompletableFuture);
         rpcResponseCompletableFuture.thenRun(
@@ -79,14 +101,15 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
                 }
         );
         //输出消息
-        byte[] data = ByteToUtil.streamToBytes(request);
+        byte[] data = request.toByteArray();
         synchronized (aioSession) {
+            assert data != null;
             aioSession.writeBuffer().writeInt(data.length + 4);
             aioSession.writeBuffer().write(data);
             aioSession.writeBuffer().flush();
         }
         try {
-            return rpcResponseCompletableFuture.get(3, TimeUnit.SECONDS);
+            return rpcResponseCompletableFuture.get(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new SocketTimeoutException("Message is timeout!");
         }

@@ -4,6 +4,8 @@ import com.base.core.util.ClassLoaderMapperUtil;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,13 +14,21 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
+/**
+ * 实例化impl
+ *
+ * @author bai
+ * @date 2023/03/28
+ */
 public class InstantiateImpl implements Instantiate<BaseProtocol> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstantiateImpl.class);
 
     private final BaseProtocol.Builder baseProtocol;
 
     private final BaseProtocol.Body.Builder body;
 
-    private final Class<?> implClass ;
+    private final Class<?> implClass;
 
     private byte[] bytes = null;
 
@@ -34,7 +44,7 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
     }
 
     public Instantiate<BaseProtocol> invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InstantiationException {
-
+        LOGGER.info("Instantiate " +  baseProtocol.getRequestID().toStringUtf8());
         ByteString[] paramClassList = this.body.getParamsTypeList().toArray(new ByteString[0]);
         List<Any> paramObjList = this.body.getParamsObjList();
 
@@ -67,11 +77,11 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
             byte[] bytes = baos.toByteArray();
             body.setMethodLength(bytes.length);
 
-            oos.writeObject(baseProtocol);
+            oos.writeObject(getBaseProtocol());
             oos.flush();
             this.bytes = baos.toByteArray();
             body.setReturn(Any.parseFrom(bytes));
-            baseProtocol.setDataLength(bytes.length);
+            baseProtocol.setDataLength(this.bytes.length);
         } catch (IOException e) {
             this.body.setException(ByteString.copyFromUtf8(e.getMessage()));
         } finally {
