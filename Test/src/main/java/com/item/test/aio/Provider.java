@@ -26,6 +26,7 @@ public class Provider {
     public static void test2() throws IOException {
         RPCProviderProcessor providerProcessor = new RPCProviderProcessor();
         AioQuickServer server = new AioQuickServer(8888, new RPCBaseProtocol(), providerProcessor);
+        providerProcessor.pushImplClass(DemoApiImpl.class);
         server.start();
 
     }

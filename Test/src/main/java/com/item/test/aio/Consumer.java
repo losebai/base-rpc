@@ -1,5 +1,6 @@
 package com.item.test.aio;
 
+import com.base.core.util.ClassLoaderMapperUtil;
 import com.base.rpc.ConsumerProcessor;
 import com.base.rpc.Protocol.RPCBaseProtocol;
 import com.base.rpc.api.DemoApi;
@@ -16,7 +17,7 @@ import java.util.concurrent.Executors;
 public class Consumer {
 
 
-    public static void test1() throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static void test1() throws Exception {
 
         RPCConsumerProcessor consumerProcessor = new RPCConsumerProcessor();
         AioQuickClient consumer = new AioQuickClient("localhost", 8888,
@@ -36,7 +37,7 @@ public class Consumer {
         });
     }
 
-    public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static void main(String[] args) throws Exception {
         test1();
 
     }

@@ -98,6 +98,7 @@ public class ConsumerProcessor implements Processor<byte[]> {
         }
 //        aioSession.write(byteArrayOutputStream.toByteArray());
         try {
+            // 阻塞知道获取返回值
             return rpcResponseCompletableFuture.get(3, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new SocketTimeoutException("Message is timeout!");

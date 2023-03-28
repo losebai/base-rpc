@@ -18,11 +18,14 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
 
     private final BaseProtocol.Body.Builder body;
 
+    private final Class<?> implClass ;
+
     private byte[] bytes = null;
 
-    public InstantiateImpl(BaseProtocol baseProtocol){
+    public InstantiateImpl(BaseProtocol baseProtocol, Class<?> implClass){
         this.baseProtocol = baseProtocol.toBuilder();
         this.body = baseProtocol.getBody().toBuilder();
+        this.implClass = implClass;
         try {
             ClassLoaderMapperUtil.addClass(body.getClassName().toStringUtf8());
         } catch (ClassNotFoundException e){
@@ -30,9 +33,9 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
         }
     }
 
-    public Instantiate<BaseProtocol> invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
+    public Instantiate<BaseProtocol> invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InstantiationException {
 
-        String[] paramClassList = this.body.getParamsTypeList().toArray(new String[0]);
+        ByteString[] paramClassList = this.body.getParamsTypeList().toArray(new ByteString[0]);
         List<Any> paramObjList = this.body.getParamsObjList();
 
         // 获取入参类型
@@ -41,9 +44,9 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
 
         try {
             for (int i = 0; i < classArray.length; i++) {
-                Class<?> clazz = ClassLoaderMapperUtil.getClass(paramClassList[i]);
+                Class<?> clazz = ClassLoaderMapperUtil.getClass(paramClassList[i].toStringUtf8());
                 if (clazz == null) {
-                    classArray[i] = Class.forName(paramClassList[i]);
+                    classArray[i] = Class.forName(paramClassList[i].toStringUtf8());
                 } else {
                     classArray[i] = clazz;
                 }
@@ -53,13 +56,7 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
         }
 
         // 调用接口
-        Object impObj = ClassLoaderMapperUtil.getClass(body.getClassName().toStringUtf8());
-        if (impObj == null) {
-            String e = " can not find interface: " + body.getClassName();
-            body.setException(ByteString.copyFromUtf8(e));
-            throw new RuntimeException(e);
-        }
-
+        Object impObj = implClass.getDeclaredConstructor().newInstance();
         Method method = impObj.getClass().getMethod(body.getMethodName().toStringUtf8(), classArray);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(baos);

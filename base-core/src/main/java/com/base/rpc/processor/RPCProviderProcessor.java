@@ -1,5 +1,6 @@
 package com.base.rpc.processor;
 
+import com.base.core.buffer.ImplBuffer;
 import com.base.rpc.Instantiate.InstantiateImpl;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
 import org.smartboot.socket.transport.AioSession;
@@ -15,6 +16,7 @@ public class RPCProviderProcessor implements Processor<BaseProtocol> {
 
     private final ExecutorService pool = Executors.newCachedThreadPool();
 
+    private final Map<String, Class<?>> implBuffer = new ImplBuffer<>();
 
     @Override
     public void process(AioSession session, BaseProtocol msg) {
@@ -24,7 +26,7 @@ public class RPCProviderProcessor implements Processor<BaseProtocol> {
                     BaseProtocol.Builder response = msg.toBuilder();
                     response.setReqRes(2);
                     try {
-                        InstantiateImpl instantiate = new InstantiateImpl(msg);
+                        InstantiateImpl instantiate = new InstantiateImpl(msg, implBuffer.get(msg.getBody().getClassName().toStringUtf8()));
                         instantiate.invoke();
                         synchronized (session){
                             byte[] data = instantiate.getBytes();
@@ -32,11 +34,16 @@ public class RPCProviderProcessor implements Processor<BaseProtocol> {
                             session.writeBuffer().write(data);
                             session.writeBuffer().flush();
                         }
-                    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | IOException e) {
+                    } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | IOException |
+                             InstantiationException e) {
                         throw new RuntimeException(e);
                     }
                 }
         );
+    }
+
+    public void pushImplClass(Class<?> _class){
+        implBuffer.put(_class.getName(), _class);
     }
 
 }
