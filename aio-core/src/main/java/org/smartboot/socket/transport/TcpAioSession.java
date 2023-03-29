@@ -266,6 +266,7 @@ final class TcpAioSession extends AioSession {
                     return;
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 messageProcessor.stateEvent(this, StateMachineEnum.PROCESS_EXCEPTION, e);
             }
         }

@@ -89,11 +89,11 @@ public class RpcInvocationHandler<T> implements RpcProxyInvocationHandler<T> {
                 oos.close();
             }
         }
-        Object obj = method.invoke(target, args);
+//        Object obj = method.invoke(target, args);
         if (afterFunc != null){
             afterFunc.apply(proxy, method, args);
         }
-        return obj;
+        return target;
     }
 
     public BaseProtocol.Body getBody(){

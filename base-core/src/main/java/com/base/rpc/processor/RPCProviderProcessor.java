@@ -39,7 +39,7 @@ public class RPCProviderProcessor implements Processor<BaseProtocol> {
                     try {
                         InstantiateImpl instantiate = new InstantiateImpl(msg, implBuffer.get(msg.getBody().getClassName().toStringUtf8()));
                         instantiate.invoke();
-                        byte[] data = instantiate.getBytes();
+                        byte[] data = instantiate.getBytes(); // 发送数据，但是不知道数据data-length
                         synchronized (session){
                             session.writeBuffer().writeInt(data.length + 4);
                             session.writeBuffer().write(data);

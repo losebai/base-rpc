@@ -1,6 +1,5 @@
 package com.base.rpc.processor;
 
-import cn.hutool.core.util.ByteUtil;
 import com.base.core.buffer.ImplBuffer;
 import com.base.core.util.ByteStringUtil;
 import com.base.core.util.ByteToUtil;
@@ -8,7 +7,6 @@ import com.base.core.util.ClassLoaderMapperUtil;
 import com.base.rpc.Protocol.RpcInvocationHandler;
 import com.base.rpc.Protocol.RpcProxyInvocationHandler;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -17,8 +15,6 @@ import org.smartboot.socket.transport.AioSession;
 
 import java.lang.reflect.Proxy;
 import java.net.SocketTimeoutException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -46,8 +42,8 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
 
     @Override
     public void process(AioSession session, BaseProtocol msg) {
+        log.info("client: " +  session.getSessionID()+  "处理异步消息");
         syncRespMap.get(msg.getRequestID()).complete(msg);
-        log.info("client: " +  session.getSessionID()+  "处理消息");
     }
 
     public <T> T getObject(final Class<T> remoteInterface) throws Exception {
@@ -84,8 +80,8 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
                     }
                     builder.setBody(bodyBuilder);
                     BaseProtocol baseProtocol = builder.build();
-                    BaseProtocol.Body body = sendRpcRequest(baseProtocol).getBody();
-                    rpcProxyInvocationHandler.setTarget(body.getReturn());
+                    BaseProtocol.Body body = sendRpcRequest(baseProtocol).getBody(); // 接受服务端返回对象
+                    rpcProxyInvocationHandler.setTarget(ByteToUtil.deserialize(body.getReturn().toByteArray()));
                     if (StringUtils.isNotEmpty(body.getException().toStringUtf8())){
                         throw new RuntimeException(body.getException().toStringUtf8());
                     }

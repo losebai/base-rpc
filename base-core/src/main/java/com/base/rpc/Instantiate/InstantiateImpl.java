@@ -78,10 +78,11 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
             oos.flush();
             byte[] bytes = baos.toByteArray();
             bodyBuilder.setMethodLength(bytes.length);
-            this.body = bodyBuilder.build();
-            this.bytes = body.toByteArray();
             bodyBuilder.setReturn(ByteString.copyFrom(bytes));
-            baseProtocol.setDataLength(this.bytes.length);
+            bodyBuilder.setResultType(ByteString.copyFromUtf8(method.getReturnType().getName()));
+            this.body = bodyBuilder.build();
+            baseProtocol.setBody(body);
+            this.bytes = baseProtocol.build().toByteArray();
         } catch (IOException e) {
             this.bodyBuilder.setException(ByteString.copyFromUtf8(e.getMessage()));
         } finally {
