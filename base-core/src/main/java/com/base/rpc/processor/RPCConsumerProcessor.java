@@ -1,5 +1,6 @@
 package com.base.rpc.processor;
 
+import cn.hutool.core.util.ByteUtil;
 import com.base.core.buffer.ImplBuffer;
 import com.base.core.util.ByteStringUtil;
 import com.base.core.util.ByteToUtil;
@@ -16,8 +17,10 @@ import org.smartboot.socket.transport.AioSession;
 
 import java.lang.reflect.Proxy;
 import java.net.SocketTimeoutException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,15 +36,17 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class RPCConsumerProcessor implements Processor<BaseProtocol> {
 
-    private final Map<ByteString, CompletableFuture<BaseProtocol.Body>> syncRespMap = new ConcurrentHashMap<>();
+    private final Map<ByteString, CompletableFuture<BaseProtocol>> syncRespMap = new ConcurrentHashMap<>();
 
     private final Map<String, Object> implBuffer = new ImplBuffer<>();
+
+    private final ImplBuffer<String, ByteString> classByteBuffer = new ImplBuffer<>();
 
     private AioSession aioSession;
 
     @Override
     public void process(AioSession session, BaseProtocol msg) {
-        syncRespMap.get(msg.getRequestID()).complete(msg.getBody());
+        syncRespMap.get(msg.getRequestID()).complete(msg);
         log.info("client: " +  session.getSessionID()+  "处理消息");
     }
 
@@ -66,18 +71,21 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
         bodyBuilder.setMethodLength(0);
         bodyBuilder.setMethodName(ByteString.EMPTY);
         bodyBuilder.setResultType(ByteString.EMPTY);
-        bodyBuilder.setReturn(Any.newBuilder().build());
-        builder.setBody(bodyBuilder);
+        bodyBuilder.setReturn(ByteString.EMPTY);
 
-        // newInstance
-        Object returnObj =  ClassLoaderMapperUtil.getClass(remoteInterface.getName()).getDeclaredConstructor().newInstance();
         RpcProxyInvocationHandler<Object> rpcProxyInvocationHandler = new RpcInvocationHandler<>();
-        rpcProxyInvocationHandler.setTarget(returnObj);
         rpcProxyInvocationHandler.setBeforeFunc(
-                (p,m,a)->{
+                (p,m, args)->{
                     bodyBuilder.setMethodName(ByteString.copyFromUtf8(m.getName()));
+                    Class<?>[] paramsClass =  m.getParameterTypes();
+                    for(int i =0; i< args.length ; i++){
+                        bodyBuilder.addParamsType(classByteBuffer.getAndSet(paramsClass[i].getName(), ByteString::copyFromUtf8));
+                        bodyBuilder.addParamsObj(ByteString.copyFrom(Objects.requireNonNull(ByteToUtil.streamToBytes(args[i]))));
+                    }
+                    builder.setBody(bodyBuilder);
                     BaseProtocol baseProtocol = builder.build();
-                    BaseProtocol.Body body = sendRpcRequest(baseProtocol);
+                    BaseProtocol.Body body = sendRpcRequest(baseProtocol).getBody();
+                    rpcProxyInvocationHandler.setTarget(body.getReturn());
                     if (StringUtils.isNotEmpty(body.getException().toStringUtf8())){
                         throw new RuntimeException(body.getException().toStringUtf8());
                     }
@@ -91,15 +99,10 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
         return (T) obj;
     }
 
-    private BaseProtocol.Body sendRpcRequest(BaseProtocol request) throws Exception {
+    private BaseProtocol sendRpcRequest(BaseProtocol request) throws Exception {
         log.info("client : write data ");
-        CompletableFuture<BaseProtocol.Body> rpcResponseCompletableFuture = new CompletableFuture<>();
+        CompletableFuture<BaseProtocol> rpcResponseCompletableFuture = new CompletableFuture<>();
         syncRespMap.put(request.getRequestID(), rpcResponseCompletableFuture);
-        rpcResponseCompletableFuture.thenRun(
-                ()->{
-                    System.out.println("开始执行方法 sendRpcRequest");
-                }
-        );
         //输出消息
         byte[] data = request.toByteArray();
         synchronized (aioSession) {
@@ -109,7 +112,7 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
             aioSession.writeBuffer().flush();
         }
         try {
-            return rpcResponseCompletableFuture.get(10, TimeUnit.SECONDS);
+            return rpcResponseCompletableFuture.get(3, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new SocketTimeoutException("Message is timeout!");
         }

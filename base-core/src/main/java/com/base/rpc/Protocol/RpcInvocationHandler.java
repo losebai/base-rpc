@@ -74,10 +74,10 @@ public class RpcInvocationHandler<T> implements RpcProxyInvocationHandler<T> {
 
             try {
                 for (int i = 0; i < types.length; i++) {
-                    body.setParamsType(i, ByteString.copyFromUtf8(types[i].getName()));
+                    body.addParamsType(ByteString.copyFromUtf8(types[i].getName()));
                     oos.writeObject(args[i]);
                     oos.flush();
-                    body.setParamsObj(i, Any.parseFrom(baos.toByteArray()));
+                    body.addParamsObj(ByteString.copyFrom(baos.toByteArray()));
                     baos.reset(); // 重置
                     oos.reset();
                 }

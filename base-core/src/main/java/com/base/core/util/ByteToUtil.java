@@ -1,7 +1,9 @@
 package com.base.core.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 
@@ -34,6 +36,13 @@ public class ByteToUtil {
             }
         }
         return null;
+    }
+
+    public static Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        try (ObjectInputStream ois = new ObjectInputStream(bis)) {
+            return ois.readObject();
+        }
     }
 
 }

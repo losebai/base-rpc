@@ -31,7 +31,7 @@ public class RPCProviderProcessor implements Processor<BaseProtocol> {
 
     @Override
     public void process(AioSession session, BaseProtocol msg) {
-        log.info("开始处理消息");
+        System.out.println("开始处理消息");
         pool.execute(
                 ()->{
                     BaseProtocol.Builder response = msg.toBuilder();
@@ -39,8 +39,8 @@ public class RPCProviderProcessor implements Processor<BaseProtocol> {
                     try {
                         InstantiateImpl instantiate = new InstantiateImpl(msg, implBuffer.get(msg.getBody().getClassName().toStringUtf8()));
                         instantiate.invoke();
+                        byte[] data = instantiate.getBytes();
                         synchronized (session){
-                            byte[] data = instantiate.getBytes();
                             session.writeBuffer().writeInt(data.length + 4);
                             session.writeBuffer().write(data);
                             session.writeBuffer().flush();
