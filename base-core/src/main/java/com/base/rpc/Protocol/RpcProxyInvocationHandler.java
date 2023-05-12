@@ -13,5 +13,11 @@ import java.lang.reflect.InvocationHandler;
 public interface RpcProxyInvocationHandler<T> extends InvocationHandler {
 
 
+    <R> void setBeforeFunc(RpcInvocationHandler.ProxyFunction<R> beforeFunc);
+
+    <R> void setAfterFunc(RpcInvocationHandler.ProxyFunction<R> afterFunc);
+
+    void setTarget(T target);
+
     BaseProtocol.Body getBody();
 }

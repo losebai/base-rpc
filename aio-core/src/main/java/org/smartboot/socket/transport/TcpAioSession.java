@@ -316,13 +316,14 @@ final class TcpAioSession extends AioSession {
                 break;
             }
 
-            //处理消息
+            //1.处理消息
             try {
                 messageProcessor.process(this, dataEntry);
                 if (modCount != this.modCount) {
                     return;
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 messageProcessor.stateEvent(this, StateMachineEnum.PROCESS_EXCEPTION, e);
             }
         }

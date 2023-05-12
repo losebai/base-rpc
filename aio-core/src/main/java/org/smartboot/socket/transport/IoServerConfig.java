@@ -44,7 +44,7 @@ final class IoServerConfig {
     /**
      * 消息体缓存大小,字节
      */
-    private int readBufferSize = 512;
+    private int readBufferSize = 5120;
     /**
      * 内存块大小限制
      */

@@ -18,5 +18,5 @@ public interface Instantiate<T> {
      * @param t t
      * @return {@link Object}
      */
-    Instantiate<T> invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException;
+    Instantiate<T> invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InstantiationException;
 }

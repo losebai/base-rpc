@@ -13,6 +13,8 @@ package org.smartboot.socket.buffer;
 
 //import jdk.internal.misc.Unsafe;
 
+//import sun.nio.ch.DirectBuffer;
+
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -276,8 +278,8 @@ public final class BufferPage {
      */
     void release() {
         if (buffer.isDirect()) {
-//            buffer.clear();
-//            Unsafe.getUnsafe().invokeCleaner(buffer);
+            buffer.clear();
+//            ((DirectBuffer) buffer).cleaner().clean();
         }
     }
 
