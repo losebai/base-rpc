@@ -9,9 +9,9 @@ public interface Handler<T> {
     /**
      * 解析 body 数据流
      *
-     * @param buffer
-     * @param request
-     * @return
+     * @param buffer  缓冲
+     * @param request 请求
+     * @return boolean
      */
     boolean onBodyStream(ByteBuffer buffer, T request);
 

@@ -28,7 +28,7 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
     private final Map<ByteString, CompletableFuture<BaseProtocol.Body>> syncRespMap = new ConcurrentHashMap<>();
     private AioSession aioSession;
 
-    private final InstanceBufferPool<Object> instanceBufferPool  = new InstanceBufferPool<Object>();
+    private final InstanceBufferPool<Object> instanceBufferPool  = new InstanceBufferPool<>();
 
     @Override
     public void process(AioSession session, BaseProtocol msg) {
@@ -42,7 +42,8 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
             return (T) obj;
         }
 
-        RpcProxyInvocationHandler<Object> rpcProxyInvocationHandler = new RpcInvocationHandler<>(obj);
+        RpcProxyInvocationHandler<Object> rpcProxyInvocationHandler = new RpcInvocationHandler<>();
+        rpcProxyInvocationHandler.setTarget(obj);
         obj = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{remoteInterface},
                 rpcProxyInvocationHandler);
 
