@@ -69,7 +69,7 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
         bodyBuilder.setMethodName(ByteString.EMPTY);
         bodyBuilder.setResultType(ByteString.EMPTY);
         bodyBuilder.setReturn(ByteString.EMPTY);
-
+        log.debug(bodyBuilder.toString());
         RpcProxyInvocationHandler<Object> rpcProxyInvocationHandler = new RpcInvocationHandler<>();
         rpcProxyInvocationHandler.setBeforeFunc(
                 (p,m, args)->{

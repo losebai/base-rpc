@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
+@SuppressWarnings("not")
 public class ProviderProcessor implements MessageProcessor<byte[]> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderProcessor.class);
     private final Map<String, Object> impMap = new HashMap<String, Object>();

@@ -63,7 +63,10 @@ public class RpcInvocationHandler<T> implements RpcProxyInvocationHandler<T> {
         if (beforeFunc != null){
             beforeFunc.apply(proxy, method, args);
         }
+        body.clearParamsType();
+        body.clearParamsObj();
         body.setMethodName(ByteString.copyFromUtf8(method.getName()));
+        LOGGER.debug(body.toString());
         Class<?>[] types = method.getParameterTypes();
         if (types.length != args.length ){
             throw new RuntimeException("方法和对象不匹配");

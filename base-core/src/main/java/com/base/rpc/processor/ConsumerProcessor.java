@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-
+@SuppressWarnings("not")
 public class ConsumerProcessor implements Processor<byte[]> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerProcessor.class);
@@ -40,6 +40,7 @@ public class ConsumerProcessor implements Processor<byte[]> {
             Response resp = (Response) objectInput.readObject();
             syncRespMap.get(resp.getUuid()).complete(resp);
         } catch (Exception e) {
+            LOGGER.error(e.getMessage());
             e.printStackTrace();
         } finally {
             if (objectInput != null) {

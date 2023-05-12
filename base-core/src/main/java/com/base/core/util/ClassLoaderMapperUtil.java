@@ -24,6 +24,14 @@ public class ClassLoaderMapperUtil {
     private static final Map<String, Class<?>> primitiveClassPool = new ConcurrentHashMap<>(32);
     static {
         scanPackage("java.lang");
+        primitiveClassPool.put("int", int.class);
+        primitiveClassPool.put("long", long.class);
+        primitiveClassPool.put("double", double.class);
+        primitiveClassPool.put("float", float.class);
+        primitiveClassPool.put("boolean", boolean.class);
+        primitiveClassPool.put("byte", byte.class);
+        primitiveClassPool.put("short", short.class);
+        primitiveClassPool.put("char", char.class);
     }
 
     public static Class<?> addClass(Class<?> _class){

@@ -23,8 +23,8 @@
         <module>./base-core</module>
         <module>./aio-core</module>
         <module>./aio-enhance</module>
-        <module>Test</module>
-        <module>aio-common</module>
+        <module>./Test</module>
+        <module>./aio-common</module>
     </modules>
 
 
@@ -33,6 +33,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <!--基本的simple，就是刚才说的SLF4J提供的基本日志实现，-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
         <!--lombok-->

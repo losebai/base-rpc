@@ -5,13 +5,14 @@ import com.base.rpc.Protocol.RPCBaseProtocol;
 import com.base.rpc.api.DemoApi;
 import com.base.rpc.Protocol.ByteProtocol;
 import com.base.rpc.processor.RPCConsumerProcessor;
+import lombok.extern.slf4j.Slf4j;
 import org.smartboot.socket.transport.AioQuickClient;
 import org.smartboot.socket.transport.AioSession;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
+@Slf4j
 public class Consumer {
 
 
@@ -63,8 +64,9 @@ public class Consumer {
 
 
     public static void main(String[] args) throws Exception {
-        test2();
-
+//        test2();
+        log.debug("debug");
+        log.info("info");
     }
 
 }

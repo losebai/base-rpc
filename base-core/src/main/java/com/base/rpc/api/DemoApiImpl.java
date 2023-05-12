@@ -15,7 +15,7 @@ public class DemoApiImpl implements DemoApi {
     @Override
     public String test(String name) {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
