@@ -47,7 +47,7 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
     public Instantiate<BaseProtocol> invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InstantiationException {
         LOGGER.info("Instantiate " +  baseProtocol.getRequestID().toStringUtf8());
         ByteString[] paramClassList = this.bodyBuilder.getParamsTypeList().toArray(new ByteString[0]);
-        ByteString[]  paramObjList = this.bodyBuilder.getParamsObjList().toArray(new ByteString[0]);
+        ByteString[] paramObjList = this.bodyBuilder.getParamsObjList().toArray(new ByteString[0]);
         Object[] args = new Object[paramObjList.length];
         // 获取入参类型
         Class<?>[] classArray = null;
@@ -78,10 +78,7 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
             oos.flush();
             byte[] bytes = baos.toByteArray();
             bodyBuilder.setMethodLength(bytes.length);
-            this.body = bodyBuilder.build();
-            this.bytes = body.toByteArray();
             bodyBuilder.setReturn(ByteString.copyFrom(bytes));
-            baseProtocol.setDataLength(this.bytes.length);
             bodyBuilder.setResultType(ByteString.copyFromUtf8(method.getReturnType().getName()));
             this.body = bodyBuilder.build();
             baseProtocol.setBody(body);
@@ -107,4 +104,3 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
         return this.bytes;
     }
 }
-

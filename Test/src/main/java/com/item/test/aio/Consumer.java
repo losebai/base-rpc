@@ -43,7 +43,7 @@ public class Consumer {
         DemoApi demoApi = consumerProcessor.getObject(DemoApi.class);
         ExecutorService pool= Executors.newCachedThreadPool();
         pool.execute(()->{
-            System.out.println(demoApi.test("smart-socket"));
+            System.out.println(demoApi.test("smart-socket1"));
         });
         pool.execute(()->{
             System.out.println(demoApi.test("smart-socket2"));
