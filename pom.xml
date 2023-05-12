@@ -24,6 +24,7 @@
         <module>./aio-core</module>
         <module>./aio-enhance</module>
         <module>Test</module>
+        <module>aio-common</module>
     </modules>
 
 

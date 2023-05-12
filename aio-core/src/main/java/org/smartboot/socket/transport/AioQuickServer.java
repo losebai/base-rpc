@@ -126,7 +126,8 @@ public final class AioQuickServer {
         if (config.isBannerEnabled()) {
             System.out.println(IoServerConfig.BANNER + "\r\n :: smart-socket " + (config.isAioEnhance() ? "[enhance]" : "") + "::\t(" + IoServerConfig.VERSION + ")");
         }
-        start0(channel -> new TcpAioSession(channel, config, aioReadCompletionHandler, aioWriteCompletionHandler, bufferPool.allocateBufferPage()));
+        start0(channel ->
+                new TcpAioSession(channel, config, aioReadCompletionHandler, aioWriteCompletionHandler, bufferPool.allocateBufferPage()));
     }
 
     /**
@@ -163,6 +164,8 @@ public final class AioQuickServer {
                     return bufferPool.newThread(r, "smart-socket:Thread-" + (++index));
                 }
             });
+
+
             this.serverSocketChannel = AsynchronousServerSocketChannel.open(asynchronousChannelGroup);
             //set socket options
             if (config.getSocketOptions() != null) {
@@ -177,6 +180,7 @@ public final class AioQuickServer {
                 serverSocketChannel.bind(new InetSocketAddress(config.getPort()), config.getBacklog());
             }
 
+            // 等待异步SocketChannel
             startAcceptThread();
         } catch (IOException e) {
             shutdown();

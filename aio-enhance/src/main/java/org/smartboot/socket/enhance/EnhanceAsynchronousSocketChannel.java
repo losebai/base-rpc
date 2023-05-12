@@ -433,6 +433,9 @@ final class EnhanceAsynchronousSocketChannel extends AsynchronousSocketChannel {
         scatteringReadBuffer = null;
     }
 
+    /**
+     * 写
+     */
     public void doWrite() {
         try {
             //此前通过Future调用,且触发了cancel

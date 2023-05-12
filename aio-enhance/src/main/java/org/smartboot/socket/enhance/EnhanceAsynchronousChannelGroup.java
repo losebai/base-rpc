@@ -25,8 +25,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
+ * 提高异步通道组
+ *
  * @author 三刀
  * @version V1.0 , 2020/5/25
+ * @date 2023/04/02
  */
 class EnhanceAsynchronousChannelGroup extends AsynchronousChannelGroup {
     /**
@@ -78,11 +81,18 @@ class EnhanceAsynchronousChannelGroup extends AsynchronousChannelGroup {
     private boolean running = true;
 
     /**
+     * 提高异步通道组
      * Initialize a new instance of this class.
+     * 初始化该类的一个新实例。
      *
-     * @param provider The asynchronous channel provider for this group
+     * @param provider            The asynchronous channel provider for this group
+     * @param readExecutorService 读遗嘱执行人服务
+     * @param threadNum           线程num
+     * @throws IOException ioexception
      */
-    protected EnhanceAsynchronousChannelGroup(AsynchronousChannelProvider provider, ExecutorService readExecutorService, int threadNum) throws IOException {
+    protected EnhanceAsynchronousChannelGroup(AsynchronousChannelProvider provider,
+                                              ExecutorService readExecutorService,
+                                              int threadNum) throws IOException {
         super(provider);
         //init threadPool for read
         this.readExecutorService = readExecutorService;
@@ -131,6 +141,7 @@ class EnhanceAsynchronousChannelGroup extends AsynchronousChannelGroup {
             acceptExecutorService.execute(acceptWorkers[i]);
         }
 
+
         scheduledExecutor = new ScheduledThreadPoolExecutor(1, r -> new Thread(r, "smart-socket:scheduled"));
     }
 
@@ -143,10 +154,12 @@ class EnhanceAsynchronousChannelGroup extends AsynchronousChannelGroup {
             futureWorker = new Worker(Selector.open(), selectionKey -> {
                 EnhanceAsynchronousSocketChannel asynchronousSocketChannel = (EnhanceAsynchronousSocketChannel) selectionKey.attachment();
                 switch (opType) {
+                    // read
                     case SelectionKey.OP_READ:
                         removeOps(selectionKey, SelectionKey.OP_READ);
                         asynchronousSocketChannel.doRead(true);
                         break;
+                        // write
                     case SelectionKey.OP_WRITE:
                         removeOps(selectionKey, SelectionKey.OP_WRITE);
                         asynchronousSocketChannel.doWrite();
@@ -290,6 +303,7 @@ class EnhanceAsynchronousChannelGroup extends AsynchronousChannelGroup {
                     while ((selectorConsumer = consumers.poll()) != null) {
                         selectorConsumer.accept(selector);
                     }
+                    // 等待事件
                     selector.select();
                     // 执行本次已触发待处理的事件
                     for (SelectionKey key : keySet) {

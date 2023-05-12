@@ -1,5 +1,6 @@
 package com.base.rpc.processor;
 
+import com.base.core.processor.Processor;
 import com.base.core.util.InstanceBufferPool;
 import com.base.rpc.Instantiate.InstantiateImpl;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;

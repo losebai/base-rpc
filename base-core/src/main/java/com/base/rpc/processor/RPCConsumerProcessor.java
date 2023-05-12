@@ -1,5 +1,6 @@
 package com.base.rpc.processor;
 
+import com.base.core.processor.Processor;
 import com.base.core.util.ByteStringUtil;
 import com.base.core.util.InstanceBufferPool;
 import com.base.rpc.Protocol.RpcInvocationHandler;
@@ -32,7 +33,6 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
     @Override
     public void process(AioSession session, BaseProtocol msg) {
         syncRespMap.get(msg.getRequestID()).complete(msg.getBody());
-        System.out.println("处理消息");
     }
 
     public <T> T getObject(final Class<T> remoteInterface) throws Exception {

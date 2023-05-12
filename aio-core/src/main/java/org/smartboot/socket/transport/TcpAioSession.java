@@ -133,7 +133,64 @@ final class TcpAioSession extends AioSession {
     void initSession(VirtualBuffer readBuffer) {
         this.readBuffer = readBuffer;
         this.readBuffer.buffer().flip();
-        signalRead();
+        initBuffer();
+    }
+
+    void initBuffer() {
+        if (status == SESSION_STATUS_CLOSED) {
+            return;
+        }
+        final ByteBuffer readBuffer = this.readBuffer.buffer();
+        final MessageProcessor<?> messageProcessor = ioServerConfig.getProcessor();
+//        while (readBuffer.hasRemaining() && status == SESSION_STATUS_ENABLED) {
+//            Object dataEntry;
+//            try {
+//                // todo 传入的session 毫无意义，  解析readBuffer
+//                dataEntry = ioServerConfig.getProtocol().decode(readBuffer, this);
+//            } catch (Exception e) {
+//                messageProcessor.stateEvent(this, StateMachineEnum.DECODE_EXCEPTION, e);
+//                throw e;
+//            }
+//            if (dataEntry == null) {
+//                break;
+//            }
+//
+//            //处理消息
+//            try {
+//                messageProcessor.process(this, dataEntry);
+//                if (modCount != this.modCount) {
+//                    return;
+//                }
+//            } catch (Exception e) {
+//                messageProcessor.stateEvent(this, StateMachineEnum.PROCESS_EXCEPTION, e);
+//            }
+//        }
+
+        if (eof || status == SESSION_STATUS_CLOSING) {
+            close(false);
+            messageProcessor.stateEvent(this, StateMachineEnum.INPUT_SHUTDOWN, null);
+            return;
+        }
+        if (status == SESSION_STATUS_CLOSED) {
+            return;
+        }
+        byteBuf.flush(); // 写出缓冲区数据刷新Function
+
+        readBuffer.compact(); // 压缩读缓冲区
+        //读缓冲区已满
+        if (!readBuffer.hasRemaining()) {
+            RuntimeException exception = new RuntimeException("readBuffer overflow");
+            messageProcessor.stateEvent(this, StateMachineEnum.DECODE_EXCEPTION, exception);
+            throw exception;
+        }
+
+        //read from channel
+        NetMonitor monitor = getServerConfig().getMonitor();
+        if (monitor != null) {
+            monitor.beforeRead(this);
+        }
+        channel.read(readBuffer, 0L, TimeUnit.MILLISECONDS, this, readCompletionHandler);
+
     }
 
     /**

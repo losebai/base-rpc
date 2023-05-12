@@ -1,4 +1,4 @@
-package com.item.test.dubbo;
+package com.item.test.util;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.DescriptorProtos;

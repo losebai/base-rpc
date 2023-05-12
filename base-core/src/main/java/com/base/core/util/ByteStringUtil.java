@@ -2,6 +2,10 @@ package com.base.core.util;
 
 import com.google.protobuf.ByteString;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
 public class ByteStringUtil {
 
 
@@ -22,7 +26,14 @@ public class ByteStringUtil {
 
         // 标识序列化类型：比如 fastjson 的值为6。
         ByteString serializationID = ByteString.copyFromUtf8("6");
+    }
 
-
+     public static byte[] ToByte(Object obj) throws IOException {
+        // 将对象转换为byte数组
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectStream = new ObjectOutputStream(byteStream);
+        objectStream.writeObject(obj);
+        objectStream.flush();
+        return byteStream.toByteArray();
     }
 }

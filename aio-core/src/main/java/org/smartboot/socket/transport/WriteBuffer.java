@@ -290,6 +290,11 @@ public final class WriteBuffer extends OutputStream {
         return count == 0 && (writeInBuf == null || writeInBuf.buffer().position() == 0);
     }
 
+    /**
+     * 调查项目
+     *
+     * @return {@link VirtualBuffer}
+     */
     VirtualBuffer pollItem() {
         if (count == 0) {
             return null;

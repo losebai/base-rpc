@@ -6,7 +6,7 @@ import org.smartboot.socket.transport.AioSession;
 import java.nio.ByteBuffer;
 
 
-public class RpcProtocol implements Protocol<byte[]> {
+public class ByteProtocol implements Protocol<byte[]> {
 
 
     @Override
