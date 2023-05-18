@@ -2,8 +2,10 @@ package com.base.rpc.processor;
 
 import com.base.core.buffer.ImplBuffer;
 import com.base.core.processor.Processor;
+import com.base.core.util.ByteStringUtil;
 import com.base.rpc.Instantiate.InstantiateImpl;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
+import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.smartboot.socket.transport.AioSession;
 
@@ -28,20 +30,25 @@ public class RPCProviderProcessor implements Processor<BaseProtocol> {
 
     @Override
     public void process(AioSession session, BaseProtocol msg) {
-        System.out.println("开始处理消息");
         pool.execute(
                 ()->{
                     BaseProtocol.Builder response = msg.toBuilder();
+                    BaseProtocol.Body.Builder body  = response.getBody().toBuilder();
                     response.setReqRes(2);
                     try {
                         InstantiateImpl instantiate = new InstantiateImpl(msg, implBuffer.get(msg.getBody().getClassName().toStringUtf8()));
-                        instantiate.invoke();
-                        byte[] data = instantiate.getBytes(); // 发送数据，但是不知道数据data-length
+                        Object result = instantiate.invoke();
+                        byte[] resultByte = ByteStringUtil.ToByte(result);
+                        body.setReturn(ByteString.copyFrom(resultByte));
+                        body.setMethodLength(resultByte.length);
+                        response.setBody(body);
+                        byte[] data =  response.build().toByteArray(); // 发送数据
                         synchronized (session){
                             session.writeBuffer().writeInt(data.length + 4);
                             session.writeBuffer().write(data);
                             session.writeBuffer().flush();
                         }
+                        log.info( "response: "+ response.toString());
                     } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | IOException |
                              InstantiationException e) {
                         throw new RuntimeException(e);

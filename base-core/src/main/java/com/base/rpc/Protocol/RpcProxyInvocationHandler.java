@@ -19,5 +19,5 @@ public interface RpcProxyInvocationHandler<T> extends InvocationHandler {
 
     void setTarget(T target);
 
-    BaseProtocol.Body getBody();
+    BaseProtocol.Body getBodyBuilder();
 }

@@ -7,14 +7,12 @@ import com.google.protobuf.ByteString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * 实例化impl
+ * 实例化impl , 阮如协议中的数据，进行解析运行结果
  *
  * @author bai
  * @date 2023/03/28
@@ -27,11 +25,8 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
 
     private final BaseProtocol.Body.Builder bodyBuilder;
 
-    private  BaseProtocol.Body body;
-
     private final Class<?> implClass;
 
-    private byte[] bytes = null;
 
     public InstantiateImpl(BaseProtocol baseProtocol, Class<?> implClass){
         this.baseProtocol = baseProtocol.toBuilder();
@@ -44,7 +39,7 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
         }
     }
 
-    public Instantiate<BaseProtocol> invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InstantiationException {
+    public Object invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InstantiationException {
         LOGGER.info("Instantiate " +  baseProtocol.getRequestID().toStringUtf8());
         ByteString[] paramClassList = this.bodyBuilder.getParamsTypeList().toArray(new ByteString[0]);
         ByteString[] paramObjList = this.bodyBuilder.getParamsObjList().toArray(new ByteString[0]);
@@ -64,43 +59,19 @@ public class InstantiateImpl implements Instantiate<BaseProtocol> {
                 args[i] = ByteToUtil.deserialize(paramObjList[i].toByteArray());
             }
         } catch (ClassNotFoundException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
         // 调用接口
         Object impObj = implClass.getDeclaredConstructor().newInstance();
         Method method = impObj.getClass().getMethod(bodyBuilder.getMethodName().toStringUtf8(), classArray);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        try {
-            Object obj = method.invoke(impObj, args); // run
-            oos.writeObject(obj);
-            oos.flush();
-            byte[] bytes = baos.toByteArray();
-            bodyBuilder.setMethodLength(bytes.length);
-            bodyBuilder.setReturn(ByteString.copyFrom(bytes));
-            bodyBuilder.setResultType(ByteString.copyFromUtf8(method.getReturnType().getName()));
-            this.body = bodyBuilder.build();
-            baseProtocol.setBody(body);
-            this.bytes = baseProtocol.build().toByteArray();
-        } catch (IOException e) {
-            this.bodyBuilder.setException(ByteString.copyFromUtf8(e.getMessage()));
-        } finally {
-            oos.close();
-            baos.close();
-        }
-        return this;
-    }
+        return method.invoke(impObj, args); // run
 
-    public BaseProtocol.Body getBody(){
-        return this.body;
     }
 
     public BaseProtocol getBaseProtocol(){
         return this.baseProtocol.buildPartial();
     }
 
-    public byte[] getBytes(){
-        return this.bytes;
-    }
 }

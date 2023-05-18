@@ -45,13 +45,10 @@ public class Consumer {
         ExecutorService pool= Executors.newCachedThreadPool();
         pool.execute(()->{
             System.out.println(demoApi.test("smart-socket1"));
-        });
-        pool.execute(()->{
             System.out.println(demoApi.test("smart-socket2"));
-        });
-        pool.execute(()->{
             System.out.println(demoApi.sum(1, 2));
         });
+
     }
 
     public static void test3() throws Exception {
@@ -64,7 +61,7 @@ public class Consumer {
 
 
     public static void main(String[] args) throws Exception {
-//        test2();
+        test2();
         log.debug("debug");
         log.info("info");
     }

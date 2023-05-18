@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * 处理器
+ * 处理器， 创建协议，并发送给服务器
  *
  * @author bai
  * @date 2023/03/28
@@ -62,33 +62,35 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
         builder.setStatus(BaseProtocol.Status.OK);
         builder.setMagicLow(ByteString.copyFromUtf8("v1"));
         builder.setWay(2);
-        BaseProtocol.Body.Builder bodyBuilder = BaseProtocol.Body.newBuilder();
-        bodyBuilder.setClassName(ByteString.copyFromUtf8(remoteInterface.getName()));
-        bodyBuilder.setNamespace(ByteString.EMPTY);
-        bodyBuilder.setMethodLength(0);
-        bodyBuilder.setMethodName(ByteString.EMPTY);
-        bodyBuilder.setResultType(ByteString.EMPTY);
-        bodyBuilder.setReturn(ByteString.EMPTY);
-        log.debug(bodyBuilder.toString());
         RpcProxyInvocationHandler<Object> rpcProxyInvocationHandler = new RpcInvocationHandler<>();
         rpcProxyInvocationHandler.setBeforeFunc(
                 (p,m, args)->{
+                    BaseProtocol.Builder newBuilder = builder.clone();
+                    BaseProtocol.Body.Builder bodyBuilder = BaseProtocol.Body.newBuilder();
+                    bodyBuilder.setClassName(ByteString.copyFromUtf8(remoteInterface.getName()));
+                    bodyBuilder.setNamespace(ByteString.EMPTY);
+                    bodyBuilder.setMethodLength(0);
+                    bodyBuilder.setMethodName(ByteString.EMPTY);
+                    bodyBuilder.setResultType(ByteString.EMPTY);
+                    bodyBuilder.setReturn(ByteString.EMPTY);
+                    bodyBuilder.clearParamsObj();
+                    bodyBuilder.clearParamsType();
                     bodyBuilder.setMethodName(ByteString.copyFromUtf8(m.getName()));
                     Class<?>[] paramsClass =  m.getParameterTypes();
                     for(int i =0; i< args.length ; i++){
                         bodyBuilder.addParamsType(classByteBuffer.getAndSet(paramsClass[i].getName(), ByteString::copyFromUtf8));
                         bodyBuilder.addParamsObj(ByteString.copyFrom(Objects.requireNonNull(ByteToUtil.streamToBytes(args[i]))));
                     }
-                    builder.setBody(bodyBuilder);
-                    BaseProtocol baseProtocol = builder.build();
+                    newBuilder.setBody(bodyBuilder);
+                    BaseProtocol baseProtocol = newBuilder.build();
                     BaseProtocol.Body body = sendRpcRequest(baseProtocol).getBody(); // 接受服务端返回对象
                     rpcProxyInvocationHandler.setTarget(ByteToUtil.deserialize(body.getReturn().toByteArray()));
                     if (StringUtils.isNotEmpty(body.getException().toStringUtf8())){
                         throw new RuntimeException(body.getException().toStringUtf8());
                     }
+                    log.info(baseProtocol.toString());
                 }
         );
-
         //proxy
         obj = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{remoteInterface},
                 rpcProxyInvocationHandler);

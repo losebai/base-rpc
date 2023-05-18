@@ -15,8 +15,12 @@ public interface Instantiate<T> {
     /**
      * 调用
      *
-     * @param t t
      * @return {@link Object}
+     * @throws NoSuchMethodException     没有这样方法异常
+     * @throws InvocationTargetException 调用目标异常
+     * @throws IllegalAccessException    非法访问异常
+     * @throws IOException               ioexception
+     * @throws InstantiationException    实例化异常
      */
-    Instantiate<T> invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InstantiationException;
+    Object invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException, InstantiationException;
 }

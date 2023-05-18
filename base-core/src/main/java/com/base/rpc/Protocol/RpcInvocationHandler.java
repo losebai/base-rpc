@@ -1,8 +1,7 @@
 package com.base.rpc.Protocol;
 
-import com.base.rpc.Instantiate.InstantiateImpl;
+import com.base.core.util.ByteToUtil;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -10,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Method;
-import java.util.function.Function;
+import java.util.Objects;
 
 /**
  * rpc调用处理程序
@@ -21,7 +20,7 @@ import java.util.function.Function;
 public class RpcInvocationHandler<T> implements RpcProxyInvocationHandler<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcInvocationHandler.class);
-    private final BaseProtocol.Body.Builder body = BaseProtocol.Body.newBuilder();
+    private final BaseProtocol.Body.Builder bodyBuilder = BaseProtocol.Body.newBuilder();
 
     private T target;
 
@@ -63,10 +62,18 @@ public class RpcInvocationHandler<T> implements RpcProxyInvocationHandler<T> {
         if (beforeFunc != null){
             beforeFunc.apply(proxy, method, args);
         }
-        body.clearParamsType();
-        body.clearParamsObj();
-        body.setMethodName(ByteString.copyFromUtf8(method.getName()));
-        LOGGER.debug(body.toString());
+        bodyBuilder.setClassName(ByteString.copyFromUtf8(proxy.getClass().getSimpleName()));
+        bodyBuilder.setNamespace(ByteString.EMPTY);
+        bodyBuilder.setResultType(ByteString.copyFromUtf8(method.getReturnType().getName()));
+        bodyBuilder.setReturn(ByteString.EMPTY);
+        bodyBuilder.setMethodName(ByteString.copyFromUtf8(method.getName()));
+        Class<?>[] paramsClass =  method.getParameterTypes();
+        for(int i =0; i< args.length ; i++){
+            bodyBuilder.addParamsType(ByteString.copyFromUtf8(paramsClass[i].getName()));
+            bodyBuilder.addParamsObj(ByteString.copyFrom(Objects.requireNonNull(ByteToUtil.streamToBytes(args[i]))));
+        }
+        this.bodyBuilder.setMethodName(ByteString.copyFromUtf8(method.getName()));
+        LOGGER.debug(this.bodyBuilder.toString());
         Class<?>[] types = method.getParameterTypes();
         if (types.length != args.length ){
             throw new RuntimeException("方法和对象不匹配");
@@ -77,15 +84,15 @@ public class RpcInvocationHandler<T> implements RpcProxyInvocationHandler<T> {
 
             try {
                 for (int i = 0; i < types.length; i++) {
-                    body.addParamsType(ByteString.copyFromUtf8(types[i].getName()));
+                    this.bodyBuilder.addParamsType(ByteString.copyFromUtf8(types[i].getName()));
                     oos.writeObject(args[i]);
                     oos.flush();
-                    body.addParamsObj(ByteString.copyFrom(baos.toByteArray()));
+                    this.bodyBuilder.addParamsObj(ByteString.copyFrom(baos.toByteArray()));
                     baos.reset(); // 重置
                     oos.reset();
                 }
             } catch (IOException e){
-                body.setException(ByteString.copyFromUtf8(e.getMessage()));
+                this.bodyBuilder.setException(ByteString.copyFromUtf8(e.getMessage()));
                 throw new RuntimeException("错误");
             } finally {
                 baos.close();
@@ -99,7 +106,7 @@ public class RpcInvocationHandler<T> implements RpcProxyInvocationHandler<T> {
         return target;
     }
 
-    public BaseProtocol.Body getBody(){
-        return body.buildPartial();
+    public BaseProtocol.Body getBodyBuilder(){
+        return bodyBuilder.buildPartial();
     }
 }
