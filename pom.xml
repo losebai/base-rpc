@@ -17,6 +17,7 @@
         <smartboot.socket.version>1.6.0</smartboot.socket.version>
         <slf4j.version>1.7.36</slf4j.version>
         <lombok.version>1.18.24</lombok.version>
+        <junit.version>4.13.2</junit.version>
     </properties>
 
     <modules>
@@ -25,45 +26,53 @@
         <module>./aio-enhance</module>
         <module>./Test</module>
         <module>./aio-common</module>
+
+        <!--        后期要删除-->
+        <module>./aio-pro</module>
+        <module>./smart-http-common</module>
+        <module>./smart-http-server</module>
     </modules>
 
+    <dependencyManagement>
+        <dependencies>
 
-    <dependencies>
+            <!--基本的simple，就是刚才说的SLF4J提供的基本日志实现，-->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <!--lombok-->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.12.0</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-core</artifactId>
+                <version>5.8.11</version>
+            </dependency>
+            <!--        <dependency>-->
+            <!--            <groupId>io.netty</groupId>-->
+            <!--            <artifactId>netty-all</artifactId>-->
+            <!--            <version>5.0.0.Alpha1</version>-->
+            <!--        </dependency>-->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <!--基本的simple，就是刚才说的SLF4J提供的基本日志实现，-->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <!--lombok-->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.7</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-core</artifactId>
-            <version>5.7.21</version>
-        </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>io.netty</groupId>-->
-        <!--            <artifactId>netty-all</artifactId>-->
-        <!--            <version>5.0.0.Alpha1</version>-->
-        <!--        </dependency>-->
-    </dependencies>
 
 
 </project>

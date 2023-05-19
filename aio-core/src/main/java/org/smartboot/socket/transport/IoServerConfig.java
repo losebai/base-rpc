@@ -44,11 +44,11 @@ final class IoServerConfig {
     /**
      * 消息体缓存大小,字节
      */
-    private int readBufferSize = 5120;
+    private int readBufferSize = 1024 * 1024 * 2;
     /**
      * 内存块大小限制
      */
-    private int writeBufferSize = 128;
+    private int writeBufferSize = 1024 * 1024;
     /**
      * Write缓存区容量
      */
