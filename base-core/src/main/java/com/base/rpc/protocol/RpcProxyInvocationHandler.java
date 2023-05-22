@@ -1,4 +1,4 @@
-package com.base.rpc.Protocol;
+package com.base.rpc.protocol;
 
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
 

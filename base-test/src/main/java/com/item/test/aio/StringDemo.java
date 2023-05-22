@@ -31,7 +31,7 @@ public class StringDemo {
             }
         };
         AioQuickServer server = new AioQuickServer(8888, new StringProtocol(), serverProcessor);
-        server.start(configuration.group());
+        server.start();
 
         //启动客户端
 //        MessageProcessor<String> clientProcessor = (session, msg) -> System.out.println("receive data from server：" + msg);

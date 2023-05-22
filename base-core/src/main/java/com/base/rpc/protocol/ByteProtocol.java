@@ -1,4 +1,4 @@
-package com.base.rpc.Protocol;
+package com.base.rpc.protocol;
 
 import org.smartboot.socket.Protocol;
 import org.smartboot.socket.transport.AioSession;

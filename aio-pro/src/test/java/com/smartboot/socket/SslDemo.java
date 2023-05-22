@@ -27,7 +27,7 @@ public class SslDemo {
         AioQuickServer sslQuickServer = new AioQuickServer(8080, new IntegerProtocol(), serverProcessor);
         SslPlugin sslServerPlugin = new SslPlugin(new ServerSSLContextFactory(SslDemo.class.getClassLoader().getResourceAsStream("server.keystore"),"123456", "123456") , ClientAuth.OPTIONAL);
         serverProcessor.addPlugin(sslServerPlugin);
-        sslQuickServer.start(configuration.group());
+//        sslQuickServer.start(configuration.group());
 
         IntegerClientProcessor clientProcessor = new IntegerClientProcessor();
         AioQuickClient sslQuickClient = new AioQuickClient("localhost", 8080, new IntegerProtocol(), clientProcessor);

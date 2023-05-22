@@ -56,6 +56,6 @@ public class IPBlackListPluginDemo {
         });
         processor.addPlugin(ipBlackListPlugin);
         AioQuickServer aioQuickServer = new AioQuickServer(8080, new NullProtocol(), processor);
-        aioQuickServer.start(configuration.group());
+//        aioQuickServer.start(configuration.group());
     }
 }

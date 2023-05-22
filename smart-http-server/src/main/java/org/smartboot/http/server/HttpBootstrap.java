@@ -121,7 +121,7 @@ public class HttpBootstrap {
     public void start() {
         initByteCache();
         BufferPagePool readBufferPool = new BufferPagePool(configuration.getReadPageSize(), 1, false);
-        configuration.getPlugins().forEach(processor::addPlugin);
+        configuration.getPlugins().forEach(processor::addPlugin); // 添加插件
 
         server = new AioQuickServer(configuration.getHost(), port, new HttpRequestProtocol(configuration), processor);
         server.setThreadNum(configuration.getThreadNum())
@@ -131,12 +131,12 @@ public class HttpBootstrap {
                 .setWriteBuffer(configuration.getWriteBufferSize(), 16);
         try {
             if (configuration.isBannerEnabled()) {
-                System.out.println(BANNER + "\r\n :: smart-http :: (" + VERSION + ")");
+                System.out.println(BANNER + "\r\n :: http :: (" + VERSION + ")");
             }
             if (configuration.group() == null) {
-                server.start(configuration.group());
+                server.start();
             } else {
-                server.start(configuration.group());
+                server.start();
             }
 
         } catch (IOException e) {
@@ -144,6 +144,11 @@ public class HttpBootstrap {
         }
     }
 
+
+    /**
+     * 更新标题名称字节树
+     *  将handle 关联到UPGRADE 上
+     */
     private void updateHeaderNameByteTree() {
         configuration.getHeaderNameByteTree().addNode(HeaderNameEnum.UPGRADE.getName(), upgrade -> {
             // WebSocket
@@ -155,6 +160,7 @@ public class HttpBootstrap {
                 return new Http2ServerHandler() {
                     @Override
                     public void handle(HttpRequest request, HttpResponse response) throws IOException {
+                        // 处理响应
                         configuration.getHttpServerHandler().handle(request, response);
                     }
 
