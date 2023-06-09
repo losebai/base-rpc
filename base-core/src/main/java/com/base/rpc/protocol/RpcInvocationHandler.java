@@ -3,7 +3,6 @@ package com.base.rpc.protocol;
 import com.base.core.util.ByteToUtil;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
 import com.google.protobuf.ByteString;
-import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +77,7 @@ public class RpcInvocationHandler<T> implements RpcProxyInvocationHandler<T> {
         if (types.length != args.length ){
             throw new RuntimeException("方法和对象不匹配");
         }
-        if (!ArrayUtils.isEmpty(types)) {
+        if (types.length > 0) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
 

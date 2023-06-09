@@ -1,6 +1,6 @@
 package com.base.http.processor;
 
-import cn.hutool.core.util.ByteUtil;
+import cn.hutool.core.util.StrUtil;
 import com.base.core.util.ByteStringUtil;
 import com.base.http.enums.DecodePartEnum;
 import com.base.http.enums.HttpStatus;
@@ -8,12 +8,10 @@ import com.base.http.exception.HttpException;
 import com.base.http.module.HttpRequest;
 import com.base.core.processor.Processor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.smartboot.socket.transport.AioSession;
 import org.smartboot.socket.transport.WriteBuffer;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 @Slf4j
 public class HttpRequestProcessor implements Processor<HttpRequest> {
@@ -62,7 +60,7 @@ public class HttpRequestProcessor implements Processor<HttpRequest> {
      */
     private void uriCheck(HttpRequest request) {
         String originalUri = request.getRequestUri();
-        if (StringUtils.length(originalUri) > MAX_LENGTH) {
+        if (StrUtil.length(originalUri) > MAX_LENGTH) {
             throw new HttpException(HttpStatus.URI_TOO_LONG);
         }
         /**
@@ -78,12 +76,12 @@ public class HttpRequestProcessor implements Processor<HttpRequest> {
         int schemeIndex = originalUri.indexOf("://");
         if (schemeIndex > 0) {//绝对路径
             int uriIndex = originalUri.indexOf('/', schemeIndex + 3);
-            if (uriIndex == StringUtils.INDEX_NOT_FOUND) {
+            if (uriIndex == StrUtil.INDEX_NOT_FOUND) {
                 request.setRequestUri("/");
             } else {
-                request.setRequestUri(StringUtils.substring(originalUri, uriIndex));
+                request.setRequestUri(StrUtil.subSuf(originalUri, uriIndex));
             }
-            request.setScheme(StringUtils.substring(originalUri, 0, schemeIndex));
+            request.setScheme(StrUtil.sub(originalUri, 0, schemeIndex));
         } else {
             request.setRequestUri(originalUri);
         }

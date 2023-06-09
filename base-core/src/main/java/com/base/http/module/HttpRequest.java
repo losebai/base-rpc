@@ -1,12 +1,12 @@
 package com.base.http.module;
 
+import cn.hutool.core.util.StrUtil;
 import com.base.core.util.HttpUtils;
 import com.base.http.enums.DecodePartEnum;
 import com.base.http.enums.HeaderNameEnum;
 import com.base.http.constants.HttpConstant;
 import com.base.http.enums.HttpTypeEnum;
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -111,8 +111,8 @@ public final class HttpRequest {
         parameters = new HashMap<>();
         //识别url中的参数
         String urlParamStr = queryString;
-        if (StringUtils.isNotBlank(urlParamStr)) {
-            urlParamStr = StringUtils.substringBefore(urlParamStr, "#");
+        if (StrUtil.isNotEmpty(urlParamStr)) {
+            urlParamStr = StrUtil.subBefore(urlParamStr, "#",false);
             HttpUtils.decodeParamString(urlParamStr, parameters);
         }
 

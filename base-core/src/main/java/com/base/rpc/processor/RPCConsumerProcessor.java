@@ -1,5 +1,6 @@
 package com.base.rpc.processor;
 
+import cn.hutool.core.util.StrUtil;
 import com.base.core.buffer.ImplBuffer;
 import com.base.core.processor.Processor;
 import com.base.core.util.ByteStringUtil;
@@ -10,7 +11,6 @@ import com.base.rpc.protocol.RpcProxyInvocationHandler;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.smartboot.socket.StateMachineEnum;
 import org.smartboot.socket.transport.AioSession;
 
@@ -85,7 +85,7 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
                     BaseProtocol baseProtocol = newBuilder.build();
                     BaseProtocol.Body body = sendRpcRequest(baseProtocol).getBody(); // 接受服务端返回对象
                     rpcProxyInvocationHandler.setTarget(ByteToUtil.deserialize(body.getReturn().toByteArray()));
-                    if (StringUtils.isNotEmpty(body.getException().toStringUtf8())){
+                    if (StrUtil.isNotEmpty(body.getException().toStringUtf8())){
                         throw new RuntimeException(body.getException().toStringUtf8());
                     }
                     log.info(baseProtocol.toString());

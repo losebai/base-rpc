@@ -1,7 +1,8 @@
 
 package com.base.core.util;
 
-import org.apache.commons.lang3.StringUtils;
+
+import cn.hutool.core.util.StrUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -16,18 +17,18 @@ public class HttpUtils {
      * @param paramMap 参数存放Map
      */
     public static void decodeParamString(String paramStr, Map<String, String[]> paramMap) {
-        if (StringUtils.isBlank(paramStr)) {
+        if (StrUtil.isBlank(paramStr)) {
             return;
         }
-        String[] uriParamStrArray = StringUtils.split(paramStr, "&");
+        String[] uriParamStrArray = StrUtil.splitToArray(paramStr, "&");
         for (String param : uriParamStrArray) {
             int index = param.indexOf("=");
             if (index == -1) {
                 continue;
             }
             try {
-                String key = StringUtils.substring(param, 0, index);
-                String value = URLDecoder.decode(StringUtils.substring(param, index + 1), "utf8");
+                String key = StrUtil.sub(param, 0, index);
+                String value = URLDecoder.decode(StrUtil.subSuf(param, index + 1), "utf8");
                 String[] values = paramMap.get(key);
                 if (values == null) {
                     paramMap.put(key, new String[]{value});
