@@ -25,7 +25,6 @@ public class Consumer {
             System.out.println(demoApi.test("smart-socket2"));
             System.out.println(demoApi.sum(1, 2));
         });
-
     }
 
 

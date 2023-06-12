@@ -30,7 +30,7 @@ public class StringDemo {
                 e.printStackTrace();
             }
         };
-        AioQuickServer server = new AioQuickServer(8888, new StringProtocol(), serverProcessor);
+        AioQuickServer server = new AioQuickServer("localhost",7777, new StringProtocol(), serverProcessor);
         server.start();
 
         //启动客户端
