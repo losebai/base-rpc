@@ -1,4 +1,6 @@
 import socket  
+import time
+
 
 def server(host,port):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,18 +32,17 @@ def client(host,port):
     # 连接服务，指定主机和端口
     client_socket.connect((host, port))
 
-    client_socket.send("init".encode('utf-8'))
-
     message = '欢迎访问菜鸟教程！' + "\r\n"
     client_socket.send(message.encode('utf-8'))
+    # time.sleep(2)
 
     # 接收小于1024字节的数据
     message = client_socket.recv(1024)
-
+    
     client_socket.close()
 
     print(message)
-    # print(message.decode('utf-8'))
+    print(message.decode('utf-8'))
 
 
 if __name__ == "__main__":

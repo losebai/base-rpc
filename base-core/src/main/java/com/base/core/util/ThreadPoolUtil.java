@@ -1,4 +1,4 @@
-package com.base.io.common.uitl;
+package com.base.core.util;
 
 import java.util.concurrent.*;
 
@@ -58,6 +58,5 @@ public class ThreadPoolUtil {
             throw new RuntimeException("ThreadPool is null");
         }
         return ExecutorHolder.executor.submit(runnable);
-
     }
 }

@@ -1,19 +1,15 @@
 package com.base.io.reactor;
-import cn.hutool.core.util.StrUtil;
-import com.base.io.common.uitl.ThreadPoolUtil;
+import com.base.core.util.ThreadPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.Iterator;
-
-import static com.base.io.reactor.Config.BUFFER_SIZE;
 
 /**
  *  主
@@ -64,13 +60,15 @@ public class ReactorSocketServer {
             Iterator<SelectionKey> keyIterator = mainSelector.selectedKeys().iterator();
             while (keyIterator.hasNext()) {
                 SelectionKey key = keyIterator.next();
+
+                // 等待连接
                 if (key.isAcceptable()) {
-//                    SocketChannel client = serverChannel.accept();
-                    ServerSocketChannel server = (ServerSocketChannel) key.channel();
-                    SocketChannel client = server.accept();
+                    SocketChannel client = serverChannel.accept();
                     client.configureBlocking(false); // 非阻塞
                     log.info(client.socket().getLocalAddress().getHostAddress() + " accept... ");
-                    subReactors[client.hashCode() % numSubReactors].registerNewClient(mainSelector,client); // 注册
+
+                    subReactors[client.hashCode() % numSubReactors].registerNewClient(client); // 注册
+//                    key.cancel(); // 取消注册
                 } else { // 分配给 SubReactor 处理的事件
                     Event event = (Event) key.attachment();
                     subReactors[event.getSubReactorId() - 1].addEvent(event);
