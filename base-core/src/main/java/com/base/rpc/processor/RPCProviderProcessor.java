@@ -37,7 +37,7 @@ public class RPCProviderProcessor implements Processor<BaseProtocol> {
                     response.setReqRes(2);
                     try {
                         InstantiateImpl instantiate = new InstantiateImpl(msg, implBuffer.get(msg.getBody().getClassName().toStringUtf8()));
-                        Object result = instantiate.invoke();
+                        Object result = instantiate.invoke(); // 调用
                         byte[] resultByte = ByteStringUtil.ToByte(result);
                         body.setReturn(ByteString.copyFrom(resultByte));
                         body.setMethodLength(resultByte.length);

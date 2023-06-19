@@ -44,7 +44,7 @@ public class RPCConsumerProcessor implements Processor<BaseProtocol> {
     @Override
     public void process(AioSession session, BaseProtocol msg) {
         log.info("client: " +  session.getSessionID()+  "处理异步消息");
-        syncRespMap.get(msg.getRequestID()).complete(msg);
+        syncRespMap.get(msg.getRequestID()).complete(msg);  // 生产服务端返回对象
     }
 
     public <T> T getObject(final Class<T> remoteInterface) throws Exception {

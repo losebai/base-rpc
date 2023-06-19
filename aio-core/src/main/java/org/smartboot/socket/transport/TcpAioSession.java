@@ -306,7 +306,7 @@ final class TcpAioSession extends AioSession {
         while (readBuffer.hasRemaining() && status == SESSION_STATUS_ENABLED) {
             Object dataEntry;
             try {
-                // todo 传入的session 毫无意义，  解析readBuffer
+                // 解析readBuffer
                 dataEntry = ioServerConfig.getProtocol().decode(readBuffer, this);
             } catch (Exception e) {
                 messageProcessor.stateEvent(this, StateMachineEnum.DECODE_EXCEPTION, e);

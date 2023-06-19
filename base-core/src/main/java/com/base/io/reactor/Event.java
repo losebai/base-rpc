@@ -2,6 +2,10 @@ package com.base.io.reactor;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * 事件
  *
@@ -21,7 +25,7 @@ public class Event {
     /**
      * 处理程序
      */
-    private final EventHandler handler;
+    private final List<EventHandler> handlers = new ArrayList<>();
     /**
      * 类型
      */
@@ -36,10 +40,15 @@ public class Event {
      *
      * @param handler 处理程序
      */
-    public Event(EventHandler handler) {
-        this.handler = handler;
+    public Event(EventHandler... handler) {
+        this.handlers.addAll(Arrays.asList(handler));
         this.type = EventType.READ;
         this.subReactorId = 1;
-//        this.subReactorId = handler.getChannel().hashCode() % Runtime.getRuntime().availableProcessors() >> 1;
+//        this.subReactorId = handler.getChannel().hashCode() % Runtime.getRuntime().availableProcessors() >> 1; // 子任务数量
+    }
+
+
+    public boolean addEventHandler(EventHandler handler){
+        return handlers.add(handler);
     }
 }

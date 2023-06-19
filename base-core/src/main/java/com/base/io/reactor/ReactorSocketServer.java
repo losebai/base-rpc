@@ -28,7 +28,7 @@ public class ReactorSocketServer {
 
     int port;
 
-//    private final static  int numSubReactors = Runtime.getRuntime().availableProcessors() >> 1;
+//    private final static  int numSubReactors = Runtime.getRuntime().availableProcessors() >> 1; // 从的数量
     private final static  int numSubReactors = 1;
     public ReactorSocketServer(String hostname, int port){
         this.hostname = hostname;

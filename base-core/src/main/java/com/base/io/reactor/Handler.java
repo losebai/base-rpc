@@ -6,11 +6,11 @@ package com.base.io.reactor;
  * @author bai
  * @date 2023/06/13
  */
-public interface Handler {
+public interface Handler<T> {
 
 
     /**
      * 过程
      */
-    void process(byte[] bytes);
+    void process(T t);
 }

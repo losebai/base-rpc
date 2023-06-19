@@ -1,5 +1,6 @@
 package com.base.io.reactor;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -38,7 +39,11 @@ public class ReactorClient {
     public void sendInfo(String info) {
         log.info(hosts+ " send... " + info);
         try {
-            socketChannel.write(ByteBuffer.wrap(info.getBytes()));
+            if (info.equals("\\n")){
+                socketChannel.close();
+            }else {
+                socketChannel.write(ByteBuffer.wrap(info.getBytes()));
+            }
         }catch (IOException e) {
             e.printStackTrace();
         }
@@ -54,21 +59,31 @@ public class ReactorClient {
 
                 Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
                 while (iterator.hasNext()) {
-
                     SelectionKey key = iterator.next();
                     if(key.isReadable()) {
+                        log.info(hosts+ " isReadable... ");
                         //得到相关的通道
                         SocketChannel sc = (SocketChannel) key.channel();
                         //得到一个Buffer
                         ByteBuffer buffer = ByteBuffer.allocate(1024);
                         //读取
                         sc.read(buffer);
+
+                        if (!buffer.hasRemaining()){
+                            key.cancel();
+                            sc.close();
+                        }
+
                         //把读到的缓冲区的数据转成字符串
                         String msg = new String(buffer.array());
                         buffer.clear();
                         log.info(hosts+ " read... " + msg);
                     }else if (key.isWritable()){
-                        log.info(hosts+ " wtire... " );
+                        log.info(hosts+ " isWritable... " );
+                        SocketChannel sc = (SocketChannel) key.channel();
+                        sc.write(ByteBuffer.wrap(new byte[0]));
+                        sc.close();
+                        key.cancel();
                     }
                 }
                 iterator.remove(); //删除当前的selectionKey, 防止重复操作
