@@ -28,4 +28,12 @@ public class DemoApiImpl implements DemoApi {
         System.out.println(a + " " + b);
         return a + b;
     }
+
+    public int sum(int... nums){
+        int t = 0;
+        for (int i : nums){
+            t+=i;
+        }
+        return t;
+    }
 }

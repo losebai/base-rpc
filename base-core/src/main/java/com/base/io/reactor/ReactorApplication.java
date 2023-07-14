@@ -13,6 +13,7 @@ public class ReactorApplication {
 
 
     public static void main(String[] args) throws IOException {
-        new  ReactorSocketServer("127.0.0.1",7777).start();
+        ReactorSocketServer reactorSocketServer = new  ReactorSocketServer("127.0.0.1",7777);
+        reactorSocketServer.start();
     }
 }

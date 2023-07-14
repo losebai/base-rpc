@@ -175,7 +175,6 @@ public final class UdpChannel {
         return bufferPage;
     }
 
-
     DatagramChannel getChannel() {
         return channel;
     }

@@ -77,6 +77,11 @@ public class ClassLoaderMapperUtil {
         }
     }
 
+    public static Set<Class<?>> scanPackage(String packagePath, Class<?> superClass){
+        return ClassScanner.scanPackage(packagePath,
+                clazz -> superClass == null || superClass.isAssignableFrom(clazz) && !superClass.equals(clazz));
+    }
+
     public static int addClassPackage(String packagePath, boolean recursion) throws URISyntaxException,
             ClassNotFoundException,
             IOException {

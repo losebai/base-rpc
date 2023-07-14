@@ -12,13 +12,9 @@ import java.nio.channels.ServerSocketChannel;
 @Slf4j
 @Getter
 public abstract class ReactorSelectIO implements SocketServer{
-
      final String host;
-
      final int port;
-
      Selector selector;
-
     ServerSocketChannel mainServer;
 
 
@@ -40,7 +36,6 @@ public abstract class ReactorSelectIO implements SocketServer{
         mainServer.bind(address);
         mainServer.configureBlocking(false);
         mainServer.register(selector, SelectionKey.OP_ACCEPT);
-
     }
 
 }

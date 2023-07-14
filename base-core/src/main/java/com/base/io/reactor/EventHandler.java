@@ -29,14 +29,14 @@ public class EventHandler implements Handler<byte[]>{
 
     @Override
     public void process(byte[] bytes) {
-        workPool.submit(()->{
-            writeBuffer = ByteBuffer.wrap(bytes);
-            try {
-                write();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        writeBuffer = ByteBuffer.wrap(bytes);
+//        workPool.submit(()->{
+//            try {
+//                write();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
     }
 
 

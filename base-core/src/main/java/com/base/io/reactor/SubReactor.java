@@ -1,6 +1,5 @@
 package com.base.io.reactor;
 
-import com.base.core.util.ThreadPoolUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,10 +7,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.nio.channels.spi.SelectorProvider;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -32,15 +28,18 @@ public class SubReactor implements  Runnable{
 
     private final Selector selector;
     private final Queue<Event> eventQueue = new ConcurrentLinkedQueue<>();
+
+    // 处理列表
     private final Map<SelectableChannel, EventHandler> handlerMap = new ConcurrentHashMap<>();
 
     public SubReactor() throws IOException {
         selector = SelectorProvider.provider().openSelector();
-//        ThreadPoolUtil.submit(this);
     }
 
     public void registerNewClient(SocketChannel client) throws IOException {
         EventHandler handler = new EventHandler(client);
+//        LinkedList<Handler<?>> handlerLink = new LinkedList<>();
+//        handlerLink.add(handler);
         handlerMap.put(client, handler); // 后期可以处理多个handler
         client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, new Event(handler)); // 将socket 注册到 从上 设置成可读
         selector.wakeup();  // 唤醒 Selector
@@ -78,7 +77,7 @@ public class SubReactor implements  Runnable{
                     log.info( " event... ");
                     Event event = eventQueue.poll(); // 检索并删除此队列的头部，如果此队列为空，则返回null。返回:此队列的头部，如果此队列为空则返回null
                     if (event != null) {
-                        event.getHandlers().get(0) .onEvent(event.getType());
+                        event.getHandlers().get(0).onEvent(event.getType());
                         log.info( " onEvent... ");
                     }
                 }
@@ -101,9 +100,9 @@ public class SubReactor implements  Runnable{
             int readNUm =  handler.read(buffer); // read
             log.info(handler.getHost()+ " read... " + new String(buffer.array()));
             if (readNUm > 0){
+                // todo 这里可以加入编码器
                 handler.process(buffer.array()); // 处理
                 buffer.clear();
-
                 if (Arrays.equals(buffer.array(), CLOSE)){
                     key.channel().close(); // 关闭后, 如果未接收数据
                     key.cancel();

@@ -66,7 +66,6 @@ public class ReactorSocketServer {
                     SocketChannel client = serverChannel.accept();
                     client.configureBlocking(false); // 非阻塞
                     log.info(client.socket().getLocalAddress().getHostAddress() + " accept... ");
-
                     subReactors[client.hashCode() % numSubReactors].registerNewClient(client); // 注册
 //                    key.cancel(); // 取消注册
                 } else { // 分配给 SubReactor 处理的事件
