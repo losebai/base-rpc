@@ -32,7 +32,6 @@ public class ReactorClient {
         //得到username
         this.hosts = socketChannel.getLocalAddress().toString().substring(1);
         log.info(hosts+ " init... ");
-
     }
 
     //向服务器发送消息

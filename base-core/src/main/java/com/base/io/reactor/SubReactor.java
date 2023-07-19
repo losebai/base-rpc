@@ -1,5 +1,6 @@
 package com.base.io.reactor;
 
+import com.base.core.Protocol.IOBaseProtocol;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,12 +29,14 @@ public class SubReactor implements  Runnable{
 
     private final Selector selector;
     private final Queue<Event> eventQueue = new ConcurrentLinkedQueue<>();
-
     // 处理列表
     private final Map<SelectableChannel, EventHandler> handlerMap = new ConcurrentHashMap<>();
 
-    public SubReactor() throws IOException {
+    private final IOBaseProtocol<?> protocol;
+
+    public SubReactor(IOBaseProtocol<?> protocol) throws IOException {
         selector = SelectorProvider.provider().openSelector();
+        this.protocol = protocol;
     }
 
     public void registerNewClient(SocketChannel client) throws IOException {
@@ -77,8 +80,8 @@ public class SubReactor implements  Runnable{
                     log.info( " event... ");
                     Event event = eventQueue.poll(); // 检索并删除此队列的头部，如果此队列为空，则返回null。返回:此队列的头部，如果此队列为空则返回null
                     if (event != null) {
-                        event.getHandlers().get(0).onEvent(event.getType());
-                        log.info( " onEvent... ");
+                        event.getHandler().onEvent(event.getType());
+                        log.info( " Event end... ");
                     }
                 }
             }catch (Exception e){
@@ -100,8 +103,10 @@ public class SubReactor implements  Runnable{
             int readNUm =  handler.read(buffer); // read
             log.info(handler.getHost()+ " read... " + new String(buffer.array()));
             if (readNUm > 0){
+
                 // todo 这里可以加入编码器
-                handler.process(buffer.array()); // 处理
+                Object object = protocol.decode(buffer);
+                handler.write(buffer.array()); // 处理
                 buffer.clear();
                 if (Arrays.equals(buffer.array(), CLOSE)){
                     key.channel().close(); // 关闭后, 如果未接收数据
@@ -117,7 +122,7 @@ public class SubReactor implements  Runnable{
             //   写操作的就绪条件为底层缓冲区有空闲空间，而写缓冲区绝大部分时间都是有空闲空间的，所以当你注册写事件后，写操作一直是就绪的，选择处理线程全占用整个CPU资源。
             //   所以，只有当你确实有数据要写时再注册写操作，并在写完以后马上取消注册
         } else if (key.isWritable()) { // write 事件 当接收到连接时，第二次一直会触发写入事件，直到对方写入数据为止,, 慎用，可直接忽略，采用write写操作就行
-            SocketChannel sc =  (SocketChannel)key.channel(); // 第一次连接后，
+            SocketChannel sc =  (SocketChannel)key.channel(); // 对应注册时，传入的对象 第一次连接后，
             ByteBuffer buffer = ByteBuffer.wrap(START);
             log.info(handler.getHost()+ " write... " + new String(START));
             if (buffer != null){

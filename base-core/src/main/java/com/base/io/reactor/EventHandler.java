@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import static com.base.io.reactor.Config.BUFFER_SIZE;
 
 @Getter
-public class EventHandler implements Handler<byte[]>{
+public class EventHandler {
 
     private final SocketChannel channel;
     private final ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE);
@@ -27,7 +27,6 @@ public class EventHandler implements Handler<byte[]>{
         host = channel.getRemoteAddress().toString();
     }
 
-    @Override
     public void process(byte[] bytes) {
         writeBuffer = ByteBuffer.wrap(bytes);
 //        workPool.submit(()->{

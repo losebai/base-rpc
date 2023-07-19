@@ -17,7 +17,6 @@ public abstract class ReactorSelectIO implements SocketServer{
      Selector selector;
     ServerSocketChannel mainServer;
 
-
     ReactorSelectIO(String host, int port){
         this.host = host;
         this.port = port;

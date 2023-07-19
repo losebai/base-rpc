@@ -1,4 +1,5 @@
 package com.base.io.reactor;
+import com.base.core.Protocol.IOBaseProtocol;
 import com.base.core.util.ThreadPoolUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,11 +29,14 @@ public class ReactorSocketServer {
 
     int port;
 
+    IOBaseProtocol<?> protocol;
+
 //    private final static  int numSubReactors = Runtime.getRuntime().availableProcessors() >> 1; // 从的数量
     private final static  int numSubReactors = 1;
-    public ReactorSocketServer(String hostname, int port){
+    public <T> ReactorSocketServer(String hostname, int port, IOBaseProtocol<T> ioBaseProtocol){
         this.hostname = hostname;
         this.port = port;
+        this.protocol = ioBaseProtocol;
     }
 
     public void start() throws IOException {
@@ -46,7 +50,7 @@ public class ReactorSocketServer {
 
         SubReactor[] subReactors = new SubReactor[numSubReactors];
         for (int i = 0; i < numSubReactors; i++) {
-            subReactors[i] = new SubReactor();
+            subReactors[i] = new SubReactor(protocol);
             ThreadPoolUtil.submit(subReactors[i]); // 开启
         }
 
