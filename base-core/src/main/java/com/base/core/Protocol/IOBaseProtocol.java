@@ -1,6 +1,8 @@
 package com.base.core.Protocol;
 
 
+import com.base.io.reactor.TCPSession;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -18,5 +20,5 @@ public interface IOBaseProtocol<T>  {
      * @param readBuffer 读到缓冲区
      * @return {@link T}
      */
-    T decode(final ByteBuffer readBuffer);
+    T decode(TCPSession tcpSession, final ByteBuffer readBuffer);
 }

@@ -17,6 +17,7 @@ public class Consumer {
         AioQuickClient consumer = new AioQuickClient("localhost", 8888,
                 new RPCBaseProtocol(), consumerProcessor);
         consumer.start();
+//        consumer.setReadBufferSize(1024);
 
         DemoApi demoApi = consumerProcessor.getObject(DemoApi.class);
         ExecutorService pool= Executors.newCachedThreadPool();

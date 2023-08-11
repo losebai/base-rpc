@@ -3,6 +3,7 @@ package com.base.io.reactor;
 import com.base.core.Protocol.IOBaseProtocol;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.smartboot.socket.transport.WriteBuffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,8 +13,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.base.io.common.ProtocolConst.CLOSE;
-import static com.base.io.common.ProtocolConst.START;
+import static com.base.io.common.ProtocolConst.*;
 import static com.base.io.reactor.Config.BUFFER_SIZE;
 
 /**
@@ -30,21 +30,23 @@ public class SubReactor implements  Runnable{
     private final Selector selector;
     private final Queue<Event> eventQueue = new ConcurrentLinkedQueue<>();
     // 处理列表
-    private final Map<SelectableChannel, EventHandler> handlerMap = new ConcurrentHashMap<>();
+    private final Map<SelectableChannel, BaseEventHandler> handlerMap = new ConcurrentHashMap<>();
 
     private final IOBaseProtocol<?> protocol;
 
-    public SubReactor(IOBaseProtocol<?> protocol) throws IOException {
+    private final TCPProcessor  processor;
+
+    public SubReactor(IOBaseProtocol<?> protocol, TCPProcessor<?> processor) throws IOException {
         selector = SelectorProvider.provider().openSelector();
         this.protocol = protocol;
+        this.processor = processor;
     }
 
     public void registerNewClient(SocketChannel client) throws IOException {
-        EventHandler handler = new EventHandler(client);
-//        LinkedList<Handler<?>> handlerLink = new LinkedList<>();
-//        handlerLink.add(handler);
-        handlerMap.put(client, handler); // 后期可以处理多个handler
-        client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, new Event(handler)); // 将socket 注册到 从上 设置成可读
+        BaseEventHandler baseEventHandler = new TCPEventHandler(client);
+        handlerMap.put(client, baseEventHandler); // 后期可以处理多个handler
+        TCPSession tcpSession = new TCPSession(client, ByteBuffer.wrap(READ));
+        client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, tcpSession); // 将socket 注册到 从上 设置成可读
         selector.wakeup();  // 唤醒 Selector
         log.info(selector.selectedKeys().toString());
     }
@@ -97,43 +99,40 @@ public class SubReactor implements  Runnable{
      * @throws IOException ioexception
      */
     private void dispatch(SelectionKey key) throws IOException {
-        EventHandler handler = handlerMap.get(key.channel());
+        BaseEventHandler handler = handlerMap.get(key.channel());
+        TCPSession tcpSession = (TCPSession) key.attachment(); // 对应注册时，传入的对象 第一次连接后，
         if (key.isReadable()) { // read
             ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
-            int readNUm =  handler.read(buffer); // read
-            log.info(handler.getHost()+ " read... " + new String(buffer.array()));
-            if (readNUm > 0){
+            handler.read(buffer); // 从缓冲区中读取
+            while (buffer.hasRemaining()){
+                Object object = null;
 
-                // todo 这里可以加入编码器
-                Object object = protocol.decode(buffer);
-                handler.write(buffer.array()); // 处理
-                buffer.clear();
-                if (Arrays.equals(buffer.array(), CLOSE)){
+                try {
+                    // todo 这里可以加入编码器
+                    object = protocol.decode(tcpSession, buffer);
+
+                }catch (Exception e){
+                    tcpSession.setStatus(TCPSession.SESSION_STATUS_CLOSING);
+                }
+                if (object == null){
+                    break;
+                }
+                processor.process(tcpSession, object);
+
+                if (tcpSession.status == TCPSession.SESSION_STATUS_CLOSING){
                     key.channel().close(); // 关闭后, 如果未接收数据
                     key.cancel();
-                    log.info(handler.getHost()+ " read ...close " + new String(buffer.array()));
+                    log.info(handler.getHost()+ " read ...close..... ");
                 }
-
-            }else {
-                key.channel().close(); // 关闭后, 如果未接收数据
-                key.cancel();
-                log.info(handler.getHost()+ " read is null ...close ");
+                buffer.clear();
             }
+            buffer.compact(); // 压缩读缓冲区
             //   写操作的就绪条件为底层缓冲区有空闲空间，而写缓冲区绝大部分时间都是有空闲空间的，所以当你注册写事件后，写操作一直是就绪的，选择处理线程全占用整个CPU资源。
             //   所以，只有当你确实有数据要写时再注册写操作，并在写完以后马上取消注册
         } else if (key.isWritable()) { // write 事件 当接收到连接时，第二次一直会触发写入事件，直到对方写入数据为止,, 慎用，可直接忽略，采用write写操作就行
-            SocketChannel sc =  (SocketChannel)key.channel(); // 对应注册时，传入的对象 第一次连接后，
-            ByteBuffer buffer = ByteBuffer.wrap(START);
+//            SocketChannel sc =  (SocketChannel)key.channel();
+            tcpSession.setStatus(TCPSession.SESSION_STATUS_ENABLED); // 连接成功
             log.info(handler.getHost()+ " write... " + new String(START));
-            if (buffer != null){
-                handler.write(buffer.array());
-                if (buffer.remaining() == 0) {
-                    key.interestOps(SelectionKey.OP_READ);
-                    handler.close(); // 关闭
-                    log.info(handler.getHost()+ " close... ");
-                    key.cancel(); // 取消注册
-                }
-            }
             key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
         }
     }

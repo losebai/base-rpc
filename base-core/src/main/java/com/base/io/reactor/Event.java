@@ -22,7 +22,7 @@ public class Event {
     /**
      * 处理程序
      */
-    private final EventHandler handler;
+    private final BaseEventHandler handler;
     /**
      * 类型
      */
@@ -37,7 +37,7 @@ public class Event {
      *
      * @param handler 处理程序
      */
-    public Event(EventHandler handler) {
+    public Event(BaseEventHandler handler) {
        this.handler = handler;
         this.type = EventType.READ;
         this.subReactorId = 1;

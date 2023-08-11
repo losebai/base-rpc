@@ -29,6 +29,8 @@ public class RPCBaseProtocol implements Protocol<BaseProtocol> {
         byte[] data = new byte[messageSize - INTEGER_BYTES];
         readBuffer.getInt();
         readBuffer.get(data);
+
+
         try {
             BaseProtocol baseProtocol = BaseProtocol.parseFrom(data);
             baseProtocol.toBuilder().setDataLength(data.length);

@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -31,12 +28,15 @@ public class ReactorSocketServer {
 
     IOBaseProtocol<?> protocol;
 
+    TCPProcessor<?> processor;
+
 //    private final static  int numSubReactors = Runtime.getRuntime().availableProcessors() >> 1; // 从的数量
     private final static  int numSubReactors = 1;
-    public <T> ReactorSocketServer(String hostname, int port, IOBaseProtocol<T> ioBaseProtocol){
+    public <T> ReactorSocketServer(String hostname, int port, IOBaseProtocol<T> ioBaseProtocol, TCPProcessor<T> processor){
         this.hostname = hostname;
         this.port = port;
         this.protocol = ioBaseProtocol;
+        this.processor = processor;
     }
 
     public void start() throws IOException {
@@ -50,7 +50,7 @@ public class ReactorSocketServer {
 
         SubReactor[] subReactors = new SubReactor[numSubReactors];
         for (int i = 0; i < numSubReactors; i++) {
-            subReactors[i] = new SubReactor(protocol);
+            subReactors[i] = new SubReactor(protocol, processor);
             ThreadPoolUtil.submit(subReactors[i]); // 开启
         }
 
