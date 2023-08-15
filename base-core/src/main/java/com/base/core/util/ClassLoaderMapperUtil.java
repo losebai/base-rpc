@@ -35,7 +35,7 @@ public class ClassLoaderMapperUtil {
     }
 
     public static Class<?> addClass(Class<?> _class){
-        return primitiveClassPool.put(_class.getSimpleName(), _class);
+        return primitiveClassPool.put(_class.getName(), _class);
     }
 
     public static Class<?> addClass(String classPath) throws ClassNotFoundException {
