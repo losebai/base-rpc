@@ -2,14 +2,14 @@ package com.base.http.protocol;
 
 import com.base.core.util.ByteToUtil;
 import com.base.http.module.HttpResponse;
-import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
-import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.smartboot.socket.Protocol;
 import org.smartboot.socket.transport.AioSession;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+
+import static com.base.io.common.BaseConstants.INTEGER_BYTES;
 
 @Slf4j
 public class HttpResponseProtocol implements Protocol<HttpResponse> {
@@ -18,13 +18,12 @@ public class HttpResponseProtocol implements Protocol<HttpResponse> {
     @Override
     public HttpResponse decode(ByteBuffer readBuffer, AioSession session) {
 
-        int messageSize = getMessage(readBuffer);
+        int messageSize = readBuffer.getInt();
         if ( messageSize == -1){
             return null;
         }
         log.info("HttpResponseProtocol  parse init ....");
         byte[] data = new byte[messageSize - INTEGER_BYTES];
-        readBuffer.getInt();
         readBuffer.get(data);
 
         try {

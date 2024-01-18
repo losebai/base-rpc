@@ -15,23 +15,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>17</jdk.version>
         <smartboot.socket.version>1.6.0</smartboot.socket.version>
-        <slf4j.version>1.7.36</slf4j.version>
-        <lombok.version>1.18.24</lombok.version>
+        <slf4j.version>2.0.5</slf4j.version>
+        <lombok.version>1.18.26</lombok.version>
         <junit.version>4.13.2</junit.version>
     </properties>
 
     <modules>
         <module>./base-core</module>
         <module>./base-test</module>
-
-        <module>./aio-core</module>
-        <module>./aio-enhance</module>
-        <module>./aio-common</module>
-
-        <!--        后期要删除-->
-        <module>./aio-pro</module>
-        <module>./smart-http-common</module>
-        <module>./smart-http-server</module>
     </modules>
 
     <dependencyManagement>

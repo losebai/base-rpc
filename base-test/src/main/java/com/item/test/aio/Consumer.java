@@ -31,7 +31,7 @@ public class Consumer {
 
 
     public static void main(String[] args) throws Exception {
-//        test2();
+        test2();
         log.debug("debug");
         log.info("info");
     }

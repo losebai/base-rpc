@@ -19,17 +19,17 @@ import java.nio.ByteBuffer;
 public class RPCBaseProtocol implements Protocol<BaseProtocol> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RPCBaseProtocol.class);
+    private static final int INTEGER_BYTES = 4;
+
     @Override
     public BaseProtocol decode(ByteBuffer readBuffer, AioSession session) {
-        int messageSize = getMessage(readBuffer);
-        if ( messageSize == -1){
+        int messageSize = readBuffer.getInt();
+        if (messageSize == -1) {
             return null;
         }
         LOGGER.info("RPCBaseProtocol rpc parse init ....");
         byte[] data = new byte[messageSize - INTEGER_BYTES];
-        readBuffer.getInt();
         readBuffer.get(data);
-
 
         try {
             BaseProtocol baseProtocol = BaseProtocol.parseFrom(data);

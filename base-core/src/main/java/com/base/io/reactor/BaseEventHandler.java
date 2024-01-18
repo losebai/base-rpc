@@ -21,7 +21,7 @@ import static com.base.io.reactor.Config.BUFFER_SIZE;
  * @date 2023/08/11
  */
 @Getter
-public abstract class BaseEventHandler<T> {
+public abstract class BaseEventHandler<T>{
 
     private final SocketChannel channel;
     private final ByteBuffer readBuffer = ByteBuffer.allocate(BUFFER_SIZE);

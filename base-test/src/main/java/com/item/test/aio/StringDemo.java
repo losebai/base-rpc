@@ -3,7 +3,9 @@ package com.item.test.aio;
 
 import com.base.core.Protocol.StringProtocol;
 import org.smartboot.socket.MessageProcessor;
+import org.smartboot.socket.transport.AioQuickClient;
 import org.smartboot.socket.transport.AioQuickServer;
+import org.smartboot.socket.transport.AioSession;
 
 import java.io.IOException;
 
@@ -34,19 +36,8 @@ public class StringDemo {
         server.start();
 
         //启动客户端
-//        MessageProcessor<String> clientProcessor = (session, msg) -> System.out.println("receive data from server：" + msg);
-//        AioQuickClient aioQuickClient = new AioQuickClient("localhost", 8888, new StringProtocol(), clientProcessor);
-//        AioSession session = aioQuickClient.start();
-        byte[] bytes = "smart-socket".getBytes();
-        //encode
-//        session.writeBuffer().writeInt(bytes.length);
-//        session.writeBuffer().write(bytes);
-        //flush data
-//        session.writeBuffer().flush();
-
-        //shutdown
-//        Thread.sleep(1000);
-//        aioQuickClient.shutdownNow();
-//        server.shutdown();
+        MessageProcessor<String> clientProcessor = (session, msg) -> System.out.println("receive data from server：" + msg);
+        AioQuickClient aioQuickClient = new AioQuickClient("localhost", 7777, new StringProtocol(), clientProcessor);
+        aioQuickClient.start();
     }
 }

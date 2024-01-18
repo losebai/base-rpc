@@ -1,4 +1,5 @@
 package com.base.io.reactor;
+
 import com.base.core.Protocol.IOBaseProtocol;
 import com.base.core.util.ThreadPoolUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -6,11 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.*;
-import java.util.Arrays;
 import java.util.Iterator;
 
 /**
- *  主
+ * 主
  * 反应堆socket服务器
  *
  * @author bai
@@ -28,11 +28,12 @@ public class ReactorSocketServer {
 
     IOBaseProtocol<?> protocol;
 
-    TCPProcessor<?> processor;
+    TCPProcessor<Object> processor;
 
-//    private final static  int numSubReactors = Runtime.getRuntime().availableProcessors() >> 1; // 从的数量
-    private final static  int numSubReactors = 1;
-    public <T> ReactorSocketServer(String hostname, int port, IOBaseProtocol<T> ioBaseProtocol, TCPProcessor<T> processor){
+    //    private final static  int numSubReactors = Runtime.getRuntime().availableProcessors() >> 1; // 从的数量
+    private final static int numSubReactors = 1;
+
+    public <T> ReactorSocketServer(String hostname, int port, IOBaseProtocol<T> ioBaseProtocol, TCPProcessor<Object> processor) {
         this.hostname = hostname;
         this.port = port;
         this.protocol = ioBaseProtocol;
@@ -45,22 +46,21 @@ public class ReactorSocketServer {
         InetSocketAddress address = new InetSocketAddress(hostname, port);
         serverChannel.bind(address);
         serverChannel.configureBlocking(false);
-        serverChannel.register(mainSelector, SelectionKey.OP_ACCEPT);
-
+        serverChannel.register(mainSelector, SelectionKey.OP_ACCEPT); // 设置可连接
 
         SubReactor[] subReactors = new SubReactor[numSubReactors];
+        // 创建subReactor 线程
         for (int i = 0; i < numSubReactors; i++) {
             subReactors[i] = new SubReactor(protocol, processor);
             ThreadPoolUtil.submit(subReactors[i]); // 开启
         }
 
         while (true) {
-            log.info(Arrays.toString(subReactors));
+            log.info("subReactors:: size :: {}", subReactors.length);
             int readyChannels = mainSelector.select();
             if (readyChannels == 0) {
                 continue;
             }
-            log.info(mainSelector.selectedKeys().toString());
             Iterator<SelectionKey> keyIterator = mainSelector.selectedKeys().iterator();
             while (keyIterator.hasNext()) {
                 SelectionKey key = keyIterator.next();
@@ -69,14 +69,20 @@ public class ReactorSocketServer {
                 if (key.isAcceptable()) {
                     SocketChannel client = serverChannel.accept();
                     client.configureBlocking(false); // 非阻塞
-                    log.info(client.socket().getLocalAddress().getHostAddress() + " accept... ");
-                    subReactors[client.hashCode() % numSubReactors].registerNewClient(client); // 注册
-//                    key.cancel(); // 取消注册
+                    log.info("{} accept... ", client.socket().getLocalAddress().getHostAddress());
+                    subReactors[client.hashCode() % numSubReactors].registerNewClient(client); // 注册到subReactors
+                } else if (key.isReadable()) {
+                    // 可读
+
+                } else if (key.isWritable()) {
+                    // 可写
+
                 } else { // 分配给 SubReactor 处理的事件
                     Event event = (Event) key.attachment();
                     subReactors[event.getSubReactorId() - 1].addEvent(event);
-                    log.info(key.channel()  + " event... ");
+                    log.info("{} event... ", key);
                 }
+                // 取消关联到main
                 keyIterator.remove();
             }
         }

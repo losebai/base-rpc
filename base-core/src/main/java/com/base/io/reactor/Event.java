@@ -12,12 +12,6 @@ import lombok.Getter;
 @Getter
 public class Event {
 
-    /**
-     * 事件类型
-     *
-     * @author bai
-     * @date 2023/06/13
-     */
 
     /**
      * 处理程序
