@@ -28,12 +28,12 @@ public class ReactorSocketServer {
 
     IOBaseProtocol<?> protocol;
 
-    TCPProcessor<Object> processor;
+    TCPProcessor<?> processor;
 
     //    private final static  int numSubReactors = Runtime.getRuntime().availableProcessors() >> 1; // 从的数量
     private final static int numSubReactors = 1;
 
-    public <T> ReactorSocketServer(String hostname, int port, IOBaseProtocol<T> ioBaseProtocol, TCPProcessor<Object> processor) {
+    public <T> ReactorSocketServer(String hostname, int port, IOBaseProtocol<T> ioBaseProtocol, TCPProcessor<T> processor) {
         this.hostname = hostname;
         this.port = port;
         this.protocol = ioBaseProtocol;

@@ -32,13 +32,13 @@ public class SubReactor implements Runnable, SocketServer {
     // 处理列表
     private final Map<SelectableChannel, BaseEventHandler<?>> handlerMap = new ConcurrentHashMap<>();
 
-    private final IOBaseProtocol<?> protocol;
+    private final IOBaseProtocol protocol;
 
-    private final TCPProcessor<Object> processor;
+    private final TCPProcessor processor;
 
     private volatile byte status = BaseConstants.status.INIT;
 
-    public SubReactor(IOBaseProtocol<?> protocol, TCPProcessor<Object> processor) throws IOException {
+    public SubReactor(IOBaseProtocol<?> protocol, TCPProcessor<?> processor) throws IOException {
         selector = SelectorProvider.provider().openSelector();
         this.protocol = protocol;
         this.processor = processor;
