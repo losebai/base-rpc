@@ -64,13 +64,15 @@ public class ReactorSocketServer {
             Iterator<SelectionKey> keyIterator = mainSelector.selectedKeys().iterator();
             while (keyIterator.hasNext()) {
                 SelectionKey key = keyIterator.next();
-
+                keyIterator.remove();
                 // 等待连接
                 if (key.isAcceptable()) {
                     SocketChannel client = serverChannel.accept();
                     client.configureBlocking(false); // 非阻塞
                     log.info("{} accept... ", client.socket().getLocalAddress().getHostAddress());
                     subReactors[client.hashCode() % numSubReactors].registerNewClient(client); // 注册到subReactors
+                } else if (key.isConnectable()){
+                    //与远程服务器建立连接。
                 } else if (key.isReadable()) {
                     // 可读
 
@@ -83,7 +85,6 @@ public class ReactorSocketServer {
                     log.info("{} event... ", key);
                 }
                 // 取消关联到main
-                keyIterator.remove();
             }
         }
     }

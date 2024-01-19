@@ -12,6 +12,8 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
+import static com.base.io.reactor.Config.BUFFER_SIZE;
+
 public class ReactorClient implements SocketServer {
 
     private static final Logger log = LoggerFactory.getLogger(ReactorClient.class);
@@ -31,7 +33,7 @@ public class ReactorClient implements SocketServer {
         //设置非阻塞
         socketChannel.configureBlocking(false);
         //将channel 注册到selector
-        socketChannel.register(selector, SelectionKey.OP_READ);
+        socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
         //得到username
         this.hosts = socketChannel.getLocalAddress().toString().substring(1);
         log.info(hosts + " init... ");
@@ -39,9 +41,14 @@ public class ReactorClient implements SocketServer {
 
     //向服务器发送消息
     public void send(byte[] info) throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(info.length + 4);
+        if (!socketChannel.isOpen()){
+            log.info("{}链接已关闭", socketChannel);
+            return;
+        }
+        ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
         buffer.putInt(info.length);
         buffer.put(info);
+        buffer.flip();
         socketChannel.write(buffer);
     }
 
@@ -84,13 +91,14 @@ public class ReactorClient implements SocketServer {
                     //把读到的缓冲区的数据转成字符串
                     String msg = new String(buffer.array());
                     buffer.clear();
-                    log.debug(hosts + " read... " + msg);
+                    log.info(hosts + " read... " + msg);
                 } else if (key.isWritable()) {
-                    log.debug(hosts + " isWritable... ");
+                    log.info(hosts + " isWritable... ");
                     SocketChannel sc = (SocketChannel) key.channel();
-                    sc.write(ByteBuffer.wrap(new byte[0]));
+                    sc.write(ByteBuffer.wrap(new byte[1]));
                     sc.close();
                     key.cancel();
+                    log.info(hosts + " write... ");
                 }
             }
             iterator.remove(); //删除当前的selectionKey, 防止重复操作
@@ -99,7 +107,9 @@ public class ReactorClient implements SocketServer {
 
     @Override
     public void stop() throws IOException {
-        selector.close();
+        this.status = BaseConstants.status.STOP;
+        socketChannel.close();
+//        selector.close();
     }
 
     public static void main(String[] args) throws Exception {
@@ -107,6 +117,10 @@ public class ReactorClient implements SocketServer {
         ReactorClient chatClient = new ReactorClient("127.0.0.1", 7777);
         chatClient.start();
         chatClient.send("你好".getBytes());
-        Thread.sleep(10);
+        chatClient.send("你好".getBytes());
+        chatClient.send("你好".getBytes());
+        chatClient.send("你好".getBytes());
+        Thread.sleep(1000);
+        chatClient.stop();
     }
 }

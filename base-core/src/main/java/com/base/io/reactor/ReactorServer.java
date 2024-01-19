@@ -24,7 +24,7 @@ public class ReactorServer {
 
         @Override
         public String decode(TCPSession tcpSession, ByteBuffer readBuffer) {
-
+            readBuffer.flip();
             int remaining = readBuffer.remaining();
             if (remaining < Integer.BYTES) {
                 return null;

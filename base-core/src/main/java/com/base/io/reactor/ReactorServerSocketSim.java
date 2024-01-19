@@ -58,4 +58,10 @@ public class ReactorServerSocketSim extends ReactorSelectIO {
             keyIterator.remove();
         }
     }
+
+
+    public static void main(String[] args) throws IOException {
+        SocketServer socketServer = new ReactorServerSocketSim("localhost", 7777);
+        socketServer.start();
+    }
 }
