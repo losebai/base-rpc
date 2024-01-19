@@ -1,6 +1,7 @@
 package com.base.io.reactor;
 
 import com.base.io.common.BaseConstants;
+import com.base.io.common.SocketServer;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,8 +17,8 @@ public abstract class ReactorSelectIO implements SocketServer {
 
     final String host;
     final int port;
-    Selector selector;
-    ServerSocketChannel mainServer;
+    Selector mainSelector;
+    ServerSocketChannel serverChannel;
 
     private volatile byte status = BaseConstants.status.INIT;
 
@@ -33,12 +34,12 @@ public abstract class ReactorSelectIO implements SocketServer {
     }
 
     public void init() throws IOException {
-        selector = Selector.open();
-        mainServer = ServerSocketChannel.open();
+        mainSelector = Selector.open();
+        serverChannel = ServerSocketChannel.open();
         InetSocketAddress address = new InetSocketAddress(host, port);
-        mainServer.bind(address);
-        mainServer.configureBlocking(false);
-        mainServer.register(selector, SelectionKey.OP_ACCEPT);
+        serverChannel.bind(address);
+        serverChannel.configureBlocking(false);
+        serverChannel.register(mainSelector, SelectionKey.OP_ACCEPT);
     }
 
     @Override

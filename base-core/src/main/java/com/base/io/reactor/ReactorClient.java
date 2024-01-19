@@ -1,6 +1,8 @@
 package com.base.io.reactor;
 
 import com.base.io.common.BaseConstants;
+import com.base.io.common.Config;
+import com.base.io.common.SocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +13,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-
-import static com.base.io.reactor.Config.BUFFER_SIZE;
 
 public class ReactorClient implements SocketServer {
 
@@ -45,11 +45,12 @@ public class ReactorClient implements SocketServer {
             log.info("{}链接已关闭", socketChannel);
             return;
         }
-        ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
+        ByteBuffer buffer = ByteBuffer.allocate(Config.WRITE_BUFFER_SIZE);
         buffer.putInt(info.length);
         buffer.put(info);
         buffer.flip();
         socketChannel.write(buffer);
+        log.info("write size {}, msg {}", info.length, buffer);
     }
 
 
@@ -95,10 +96,8 @@ public class ReactorClient implements SocketServer {
                 } else if (key.isWritable()) {
                     log.info(hosts + " isWritable... ");
                     SocketChannel sc = (SocketChannel) key.channel();
-                    sc.write(ByteBuffer.wrap(new byte[1]));
                     sc.close();
                     key.cancel();
-                    log.info(hosts + " write... ");
                 }
             }
             iterator.remove(); //删除当前的selectionKey, 防止重复操作
@@ -108,19 +107,19 @@ public class ReactorClient implements SocketServer {
     @Override
     public void stop() throws IOException {
         this.status = BaseConstants.status.STOP;
-        socketChannel.close();
-//        selector.close();
+        socketChannel.close(); // 触发c->write事件
+        selector.close();
     }
 
     public static void main(String[] args) throws Exception {
         //启动我们客户端
         ReactorClient chatClient = new ReactorClient("127.0.0.1", 7777);
         chatClient.start();
-        chatClient.send("你好".getBytes());
-        chatClient.send("你好".getBytes());
-        chatClient.send("你好".getBytes());
-        chatClient.send("你好".getBytes());
+        chatClient.send("你好1".getBytes());
+        chatClient.send("你好2".getBytes());
+        chatClient.send("你好3".getBytes());
+        chatClient.send("你好4".getBytes());
         Thread.sleep(1000);
-        chatClient.stop();
+//        chatClient.stop();
     }
 }

@@ -1,8 +1,8 @@
 package com.base.io.common;
 
 public interface BaseConstants {
-    int INTEGER_BYTES = 4;
 
+    int INTEGER_BYTES = 4;
 
     interface status{
         byte INIT = 0;
@@ -12,7 +12,6 @@ public interface BaseConstants {
         byte STOP = 2;
 
         byte CLOSE = 3;
-
     }
 
 

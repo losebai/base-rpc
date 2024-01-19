@@ -1,6 +1,8 @@
 package com.base.io.reactor;
 
 import cn.hutool.core.util.StrUtil;
+import com.base.io.common.Config;
+import com.base.io.common.SocketServer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -8,8 +10,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-
-import static com.base.io.reactor.Config.BUFFER_SIZE;
 
 @Slf4j
 public class ReactorServerSocketSim extends ReactorSelectIO {
@@ -22,24 +22,24 @@ public class ReactorServerSocketSim extends ReactorSelectIO {
 
     @Override
     public void dispatch() throws IOException {
-        int readyChannels = selector.select();
+        int readyChannels = mainSelector.select();
         if (readyChannels == 0) {
             return;
         }
-        log.info(selector.selectedKeys().toString());
-        Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
+        log.info(mainSelector.selectedKeys().toString());
+        Iterator<SelectionKey> keyIterator = mainSelector.selectedKeys().iterator();
         while (keyIterator.hasNext()) {
             SelectionKey key = keyIterator.next();
             if (key.isAcceptable()) {
                 // a connection was accepted by a ServerSocketChannel.
-                SocketChannel client = mainServer.accept();
+                SocketChannel client = serverChannel.accept();
                 client.configureBlocking(false);
-                client.register(selector, SelectionKey.OP_READ);
+                client.register(mainSelector, SelectionKey.OP_READ);
                 log.info(client.socket().getLocalAddress().getHostAddress() + " accept... ");
             } else if (key.isReadable()) {
                 // a channel is ready for reading
                 SocketChannel client = (SocketChannel) key.channel();
-                ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
+                ByteBuffer buffer = ByteBuffer.allocate(Config.READ_BUFFER_SIZE);
                 client.read(buffer);
                 String request = new String(buffer.array()).trim();
                 log.info(client.socket().getLocalAddress().getHostAddress() + " read... " + request);

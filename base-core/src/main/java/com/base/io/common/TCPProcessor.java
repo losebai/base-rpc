@@ -1,4 +1,6 @@
-package com.base.io.reactor;
+package com.base.io.common;
+
+import com.base.io.reactor.TCPSession;
 
 public interface TCPProcessor<T> {
 

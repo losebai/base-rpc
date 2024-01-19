@@ -2,6 +2,8 @@ package com.base.io.reactor;
 
 import com.base.core.Protocol.IOBaseProtocol;
 import com.base.core.decoder.FixedLengthFrameDecoder;
+import com.base.io.common.Config;
+import com.base.io.common.TCPProcessor;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -24,7 +26,6 @@ public class ReactorServer {
 
         @Override
         public String decode(TCPSession tcpSession, ByteBuffer readBuffer) {
-            readBuffer.flip();
             int remaining = readBuffer.remaining();
             if (remaining < Integer.BYTES) {
                 return null;
@@ -61,6 +62,14 @@ public class ReactorServer {
         @Override
         public void process(TCPSession session, String msg) {
             System.out.printf(msg);
+            if (msg.equals("你好2")){
+                byte[] bytes = "收到".getBytes();
+                ByteBuffer buffer = ByteBuffer.allocate(Config.WRITE_BUFFER_SIZE);
+                buffer.putInt(bytes.length);
+                buffer.put(bytes);
+                buffer.flip();
+                session.setWriteBuffer(buffer);
+            }
         }
     }
 

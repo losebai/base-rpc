@@ -1,25 +1,21 @@
 package com.base.io.common;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 
-public interface Channel {
+public interface Channel extends Closeable {
 
-    void open();
+    void close() throws IOException;
 
-    void close();
+    int read(ByteBuffer buffer) throws IOException;
 
-    byte[] read(int size);
+    int send(ByteBuffer var) throws IOException;
 
-    void read(ByteBuffer buffer);
+    SocketAddress getRemoteAddress() throws IOException;
 
-    void send(byte[] bytes);
-
-    void send(String str);
-
-    InetSocketAddress getRemoteAddress() throws IOException;
-
-    InetSocketAddress getLocalAddress() throws IOException;
+    SocketAddress getLocalAddress() throws IOException;
 
 }
