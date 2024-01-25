@@ -27,7 +27,7 @@ public class ReactorClient implements SocketServer {
 
     private volatile byte status = BaseConstants.status.INIT;
 
-    public<T> ReactorClient(String hosts, int port, IOBaseProtocol<T> ioBaseProtocol, TCPProcessor<T> processor) throws IOException {
+    public<T> ReactorClient(String hosts, int port) throws IOException {
 
         selector = Selector.open();
         //连接服务器
