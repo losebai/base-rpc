@@ -1,8 +1,10 @@
 package com.base.io.reactor;
 
+import com.base.core.Protocol.IOBaseProtocol;
 import com.base.io.common.BaseConstants;
 import com.base.io.common.Config;
 import com.base.io.common.SocketServer;
+import com.base.io.common.TCPProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,7 @@ public class ReactorClient implements SocketServer {
 
     private volatile byte status = BaseConstants.status.INIT;
 
-    public ReactorClient(String hosts, int port) throws IOException {
+    public<T> ReactorClient(String hosts, int port, IOBaseProtocol<T> ioBaseProtocol, TCPProcessor<T> processor) throws IOException {
 
         selector = Selector.open();
         //连接服务器
@@ -95,9 +97,8 @@ public class ReactorClient implements SocketServer {
                     log.info(hosts + " read... " + msg);
                 } else if (key.isWritable()) {
                     log.info(hosts + " isWritable... ");
-                    SocketChannel sc = (SocketChannel) key.channel();
-                    sc.close();
-                    key.cancel();
+                    // 取消写入事件
+                    key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
                 }
             }
             iterator.remove(); //删除当前的selectionKey, 防止重复操作
@@ -111,15 +112,5 @@ public class ReactorClient implements SocketServer {
         selector.close();
     }
 
-    public static void main(String[] args) throws Exception {
-        //启动我们客户端
-        ReactorClient chatClient = new ReactorClient("127.0.0.1", 7777);
-        chatClient.start();
-        chatClient.send("你好1".getBytes());
-        chatClient.send("你好2".getBytes());
-        chatClient.send("你好3".getBytes());
-        chatClient.send("你好4".getBytes());
-        Thread.sleep(1000);
-//        chatClient.stop();
-    }
+
 }

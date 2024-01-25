@@ -183,10 +183,10 @@ public class SubReactor implements Runnable, SocketServer {
                 tcpSession.setStatus(TCPSession.SESSION_STATUS_CLOSING);
                 return;
             }
-            // 读完数据后，为 SelectionKey 注册可写事件
-//            if (!isInterest(key, SelectionKey.OP_WRITE)) {
-//                key.interestOps(key.interestOps() + SelectionKey.OP_WRITE);
-//            }
+//             读完数据后，为 SelectionKey 注册可写事件
+            if (!isInterest(key, SelectionKey.OP_WRITE)) {
+                key.interestOps(key.interestOps() + SelectionKey.OP_WRITE);
+            }
 
             // 刷新写缓冲区
             handler.flush();

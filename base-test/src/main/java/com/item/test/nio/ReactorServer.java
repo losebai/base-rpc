@@ -1,9 +1,11 @@
-package com.base.io.reactor;
+package com.item.test.nio;
 
 import com.base.core.Protocol.IOBaseProtocol;
 import com.base.core.decoder.FixedLengthFrameDecoder;
 import com.base.io.common.Config;
 import com.base.io.common.TCPProcessor;
+import com.base.io.reactor.ReactorSocketServer;
+import com.base.io.reactor.TCPSession;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *  主从分离io
+ * 主从分离io
  * 反应器应用
  *
  * @author bai
@@ -20,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ReactorServer {
 
-    public static class StringIOBaseProtocol implements IOBaseProtocol<String>{
+    public static class StringIOBaseProtocol implements IOBaseProtocol<String> {
 
         private final Map<TCPSession, FixedLengthFrameDecoder> decoderMap = new ConcurrentHashMap<>();
 
@@ -62,7 +64,7 @@ public class ReactorServer {
         @Override
         public void process(TCPSession session, String msg) {
             System.out.printf(msg);
-            if (msg.equals("你好2")){
+            if (msg.equals("你好2")) {
                 byte[] bytes = "收到".getBytes();
                 ByteBuffer buffer = ByteBuffer.allocate(Config.WRITE_BUFFER_SIZE);
                 buffer.putInt(bytes.length);
@@ -73,11 +75,10 @@ public class ReactorServer {
         }
     }
 
-
-
     public static void main(String[] args) throws IOException {
-        ReactorSocketServer reactorSocketServer = new  ReactorSocketServer("127.0.0.1",7777,
+        ReactorSocketServer reactorSocketServer = new ReactorSocketServer("127.0.0.1", 7777,
                 new StringIOBaseProtocol(), new StringProcessor());
         reactorSocketServer.start();
     }
+
 }

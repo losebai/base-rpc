@@ -53,15 +53,12 @@ public class ReactorServerSocketSim extends ReactorSelectIO {
                     buffer.clear();
                 }
             } else if (key.isWritable()) {
-
+                key.interestOps(key.interestOps() & ~SelectionKey.OP_WRITE);
             }
             keyIterator.remove();
         }
     }
 
 
-    public static void main(String[] args) throws IOException {
-        SocketServer socketServer = new ReactorServerSocketSim("localhost", 7777);
-        socketServer.start();
-    }
+
 }
