@@ -1,5 +1,6 @@
 package com.base.io.reactor;
 
+import com.base.io.common.EventHandler;
 import com.base.rpc.protocol.RPCProtocol.BaseProtocol;
 
 import java.io.IOException;
@@ -15,20 +16,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author bai
  * @date 2023/08/11
  */
-public abstract class BaseEventHandler<T>{
+public abstract class BaseEventHandler<T> implements EventHandler<T> {
 
     private final Map<String, CompletableFuture<BaseProtocol>> syncRespMap = new ConcurrentHashMap<>();
 
-    public BaseEventHandler()  {
-    }
+    public BaseEventHandler()  {}
 
     public abstract void process(T t);
-
-    public abstract int read(ByteBuffer buffer) throws IOException;
-
-    public abstract int write(ByteBuffer buffer) throws IOException;
-
-    public abstract void flush() throws IOException;
 
     public Map<String, CompletableFuture<BaseProtocol>> getSyncRespMap() {
         return syncRespMap;
@@ -37,10 +31,8 @@ public abstract class BaseEventHandler<T>{
     public void onEvent(EventType type, ByteBuffer buffer) throws IOException {
         switch (type) {
             case READ:
-                read(buffer);
                 break;
             case WRITE:
-                write(buffer);
                 break;
         }
     }

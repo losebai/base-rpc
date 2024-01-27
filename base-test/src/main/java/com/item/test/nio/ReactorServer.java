@@ -63,14 +63,13 @@ public class ReactorServer {
 
         @Override
         public void process(TCPSession session, String msg) {
-            System.out.printf(msg);
+            System.out.println(msg);
             if (msg.equals("你好2")) {
                 byte[] bytes = "收到".getBytes();
-                ByteBuffer buffer = ByteBuffer.allocate(Config.WRITE_BUFFER_SIZE);
+                ByteBuffer buffer = session.writeBuffer();
                 buffer.putInt(bytes.length);
                 buffer.put(bytes);
                 buffer.flip();
-                session.setWriteBuffer(buffer);
             }
         }
     }

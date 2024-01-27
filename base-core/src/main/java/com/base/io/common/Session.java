@@ -82,4 +82,12 @@ public interface Session {
      * @throws IOException IO异常
      */
     SocketAddress getRemoteAddress() throws IOException;
+
+
+    /**
+     * 冲洗
+     *
+     * @throws IOException ioexception
+     */
+    void flush() throws IOException;
 }

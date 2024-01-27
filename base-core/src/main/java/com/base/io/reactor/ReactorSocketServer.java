@@ -3,6 +3,7 @@ package com.base.io.reactor;
 import com.base.core.Protocol.IOBaseProtocol;
 import com.base.core.util.ThreadPoolUtil;
 import com.base.io.common.Config;
+import com.base.io.common.EventHandler;
 import com.base.io.common.TCPProcessor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -64,7 +65,6 @@ public class ReactorSocketServer extends ReactorSelectIO {
             // 等待连接
             if (key.isAcceptable()) {
                 SocketChannel client = serverChannel.accept();
-                client.configureBlocking(false); // 非阻塞
                 log.info("{} accept... ", client.socket().getLocalAddress().getHostAddress());
                 subReactors[client.hashCode() % Config.SubReactors_SIZE].registerNewClient(client); // 注册到subReactors
             } else if (key.isConnectable()) {
@@ -81,5 +81,10 @@ public class ReactorSocketServer extends ReactorSelectIO {
                 log.debug("{} event... ", key);
             }
         }
+    }
+
+    @Override
+    public void addEventHandler(EventHandler<?> eventHandler) {
+
     }
 }

@@ -3,6 +3,8 @@ package com.base.io.reactor;
 import cn.hutool.core.io.IoUtil;
 import com.base.io.common.Channel;
 import com.base.io.common.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -11,6 +13,8 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.Semaphore;
 
 public class TCPSession implements Session {
+
+    private static final Logger log = LoggerFactory.getLogger(TCPSession.class);
 
     /**
      * 会话状态接受
@@ -61,15 +65,16 @@ public class TCPSession implements Session {
     private final ByteBuffer readBuffer;
 
 
-    /**
+    /**x
      * 输出信号量,防止并发write导致异常
      */
     private final Semaphore semaphore = new Semaphore(1);
 
 
-    public TCPSession(SocketChannel channel, ByteBuffer readBuffer){
+    public TCPSession(SocketChannel channel, ByteBuffer readBuffer, ByteBuffer writeBuffer){
         this.channel = new TCPChannelDefault(channel);
         this.readBuffer = readBuffer;
+        this.writeBuffer = writeBuffer;
     }
 
 
@@ -132,5 +137,20 @@ public class TCPSession implements Session {
 
     public Semaphore getSemaphore() {
         return semaphore;
+    }
+
+    @Override
+    public void flush() throws IOException {
+        if (this.isClose()){
+            throw new RuntimeException("tcpSession is closed");
+        }
+        if (this.getSemaphore().tryAcquire()) {
+            ByteBuffer buffer = this.writeBuffer();
+            if (buffer != null){
+                log.info("{} send {}", this.getChannel(), buffer);
+                this.getChannel().send(buffer);
+            }
+            this.getSemaphore().release();
+        }
     }
 }
