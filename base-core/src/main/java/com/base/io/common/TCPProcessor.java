@@ -2,8 +2,8 @@ package com.base.io.common;
 
 import com.base.io.reactor.TCPSession;
 
+@FunctionalInterface
 public interface TCPProcessor<T> {
-
 
 
     /**

@@ -2,7 +2,6 @@ package com.base.http.module;
 
 import cn.hutool.core.util.StrUtil;
 import com.base.core.util.HttpUtils;
-import com.base.http.enums.DecodePartEnum;
 import com.base.http.enums.HeaderNameEnum;
 import com.base.http.constants.HttpConstant;
 import com.base.http.enums.HttpTypeEnum;
@@ -62,8 +61,6 @@ public final class HttpRequest {
     private int headerSize = 0;
 
     private HttpTypeEnum type = null;
-
-    private DecodePartEnum decodePartEnum = DecodePartEnum.HEADER_FINISH;
 
 
     public void setHeader(String headerName, String value) {

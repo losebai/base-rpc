@@ -81,7 +81,7 @@ public static void main(String[] args) throws IOException {
 ```java
 public static void main(String[] args) throws Exception {
         //启动我们客户端
-        ReactorClient chatClient = new ReactorClient("127.0.0.1", 7777);
+        ReactorClient chatClient = new ReactorClient("127.0.0.1", 7777, new StringIOBaseProtocol(), new StringProcessor());
         chatClient.start();
         chatClient.send("你好1".getBytes());
         chatClient.send("你好2".getBytes());
@@ -91,7 +91,9 @@ public static void main(String[] args) throws Exception {
         chatClient.stop();
     }
 ```
-
+#### 如下实例
+![img.png](img.png)
+![img_1.png](img_1.png)
 
 
 

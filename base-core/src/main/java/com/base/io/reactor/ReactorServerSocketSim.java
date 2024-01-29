@@ -2,7 +2,7 @@ package com.base.io.reactor;
 
 import cn.hutool.core.util.StrUtil;
 import com.base.io.common.Config;
-import com.base.io.common.SocketServer;
+import com.base.io.common.EventHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -59,6 +59,10 @@ public class ReactorServerSocketSim extends ReactorSelectIO {
         }
     }
 
+    @Override
+    public void addEventHandler(EventHandler<?> eventHandler) {
+
+    }
 
 
 }

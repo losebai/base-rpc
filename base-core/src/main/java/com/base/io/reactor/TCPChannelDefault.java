@@ -7,6 +7,12 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+/**
+ * tcpchannel违约
+ *
+ * @author bai
+ * @date 2024/01/27
+ */
 public class TCPChannelDefault implements Channel {
 
     private final SocketChannel channel;
@@ -43,4 +49,6 @@ public class TCPChannelDefault implements Channel {
     public SocketAddress getLocalAddress() throws IOException {
         return channel.getLocalAddress();
     }
+
+
 }

@@ -34,6 +34,9 @@ public class ReactorServer {
             }
             readBuffer.mark();
             int length = readBuffer.getInt();
+            if (length == 0){
+                return null;
+            }
             //消息长度超过缓冲区容量引发的半包,启用定长消息解码器,本次解码失败
             if (length + Integer.BYTES > readBuffer.capacity()) {
                 FixedLengthFrameDecoder fixedLengthFrameDecoder = new FixedLengthFrameDecoder(length);
@@ -63,14 +66,13 @@ public class ReactorServer {
 
         @Override
         public void process(TCPSession session, String msg) {
-            System.out.printf(msg);
+            System.out.println(msg);
             if (msg.equals("你好2")) {
                 byte[] bytes = "收到".getBytes();
-                ByteBuffer buffer = ByteBuffer.allocate(Config.WRITE_BUFFER_SIZE);
+                ByteBuffer buffer = session.writeBuffer();
                 buffer.putInt(bytes.length);
                 buffer.put(bytes);
                 buffer.flip();
-                session.setWriteBuffer(buffer);
             }
         }
     }
