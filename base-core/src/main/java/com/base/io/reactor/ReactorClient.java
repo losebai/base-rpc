@@ -1,11 +1,9 @@
 package com.base.io.reactor;
 
-import com.base.core.Protocol.IOBaseProtocol;
 import com.base.io.common.BaseConstants;
 import com.base.io.common.Config;
 import com.base.io.common.EventHandler;
 import com.base.io.common.SocketServer;
-import com.base.io.common.TCPProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,26 +23,29 @@ public class ReactorClient implements SocketServer {
     private final Selector selector;
     private final SocketChannel socketChannel;
     private final String hosts;
+    private final SelectionKey selectionKey;
 
     private volatile byte status = BaseConstants.status.INIT;
 
     private final TCPSelectorIO tcpSelectorIO;
 
+    private final TCPSession tcpSession;
+
     public <T> ReactorClient(String hosts, int port, TCPSelectorIO<T> tcpSelectorIO) throws IOException {
         this.tcpSelectorIO = tcpSelectorIO;
-
         selector = Selector.open();
         //连接服务器
         socketChannel = SocketChannel.open(new InetSocketAddress(hosts, port));
-        TCPSession tcpSession = new TCPSession(socketChannel, ByteBuffer.allocate(Config.READ_BUFFER_SIZE), ByteBuffer.allocate(Config.WRITE_BUFFER_SIZE));
+        tcpSession = new TCPSession(socketChannel, ByteBuffer.allocate(Config.READ_BUFFER_SIZE), ByteBuffer.allocate(Config.WRITE_BUFFER_SIZE));
         //设置非阻塞
         socketChannel.configureBlocking(false);
         //将channel 注册到selector
-        socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, tcpSession);
+        selectionKey = socketChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, tcpSession);
         //得到username
         this.hosts = socketChannel.getLocalAddress().toString().substring(1);
-        BaseEventHandler<T> baseEventHandler = new TCPEventHandler<>(tcpSession);
-        this.tcpSelectorIO.handlerMap.put(socketChannel, baseEventHandler); // 后期可以处理多个handler
+        BaseEventHandler<T> baseEventHandler = new DefaultEventHandler<>(tcpSession);
+        tcpSelectorIO.setHandlerMap(selectionKey.channel(), baseEventHandler); // 后期可以处理多个handler
+        baseEventHandler.onConnect();
         log.info(hosts + " init... ");
     }
 
@@ -88,10 +89,6 @@ public class ReactorClient implements SocketServer {
             while (iterator.hasNext()) {
                 SelectionKey key = iterator.next();
                 TCPSession tcpSession = (TCPSession) key.attachment(); // 对应注册时，传入的对象 第一次连接后
-                // io connect
-                tcpSelectorIO.connect(key, tcpSession);
-                // io链接回调
-                tcpSelectorIO.connect(key, tcpSession);
                 try {
                     // 分配给 SubReactor 处理的事件
                     log.info(key.channel() + " handler... ");
@@ -116,10 +113,28 @@ public class ReactorClient implements SocketServer {
         this.status = BaseConstants.status.STOP;
         socketChannel.close(); // 触发c->write事件
         selector.close();
+        tcpSelectorIO.close(selectionKey, tcpSession);
     }
 
     @Override
     public void addEventHandler(EventHandler<?> eventHandler) {
 
     }
+
+    public Selector getSelector() {
+        return selector;
+    }
+
+    public SocketChannel getSocketChannel() {
+        return socketChannel;
+    }
+
+    public String getHosts() {
+        return hosts;
+    }
+
+    public byte getStatus() {
+        return status;
+    }
+
 }

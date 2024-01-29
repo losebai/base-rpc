@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static com.base.io.reactor.TCPSession.SESSION_STATUS_ENABLED;
 
 /**
- * io 实际处理逻辑
+ * SelectorIO模型 实际处理逻辑
  *
  * @author bai
  * @date 2024/01/27
@@ -53,14 +53,14 @@ public class TCPSelectorIO<T> implements BaseIO<SelectionKey, TCPSession> {
         if (handler != null){
             handler.onConnect();
         }
-        log.info("TCPSelectorIO connect");
+        log.info("TCPSelectorIO connect: {}", selectionKey);
     }
 
     @Override
     public void close(SelectionKey selectionKey, TCPSession tcpSession) throws IOException {
         selectionKey.cancel();
         tcpSession.close();
-        log.info("TCPSelectorIO close");
+        log.info("TCPSelectorIO close: {}", selectionKey);
     }
 
     @Override
@@ -70,12 +70,12 @@ public class TCPSelectorIO<T> implements BaseIO<SelectionKey, TCPSession> {
 
     @Override
     public void handler(SelectionKey key, TCPSession tcpSession) throws IOException {
-        BaseEventHandler<?> handler = handlerMap.get(key.channel());
+        BaseEventHandler<T> handler = handlerMap.get(key.channel());
         Channel channel = tcpSession.getChannel();
         if (key.isConnectable()) {
             //与远程服务器建立连接。
             // 子协议
-            int i;
+
         } else if (key.isReadable()) { // read
             log.info(tcpSession.getRemoteAddress() + " read... ");
             ByteBuffer buffer = tcpSession.readBuffer();
@@ -87,8 +87,7 @@ public class TCPSelectorIO<T> implements BaseIO<SelectionKey, TCPSession> {
                 T object = null;
                 try {
                     // 解码
-                    object = protocol.decode(tcpSession, buffer);
-
+                    object = handler.process(protocol.decode(tcpSession, buffer));
                 } catch (Exception e) {
                     tcpSession.setStatus(TCPSession.DECODE_EXCEPTION);
                 }
@@ -98,26 +97,32 @@ public class TCPSelectorIO<T> implements BaseIO<SelectionKey, TCPSession> {
                 try {
                     // 处理消息
                     processor.process(tcpSession, object);
+                    handler.onMessage(object);
                 } catch (Exception e){
                     tcpSession.setStatus(TCPSession.PROCESS_EXCEPTION);
                 }
                 log.info(tcpSession.getRemoteAddress() + " size {} read... {}", readNum, object);
             }
 
+            // 压缩读缓冲区
+            buffer.compact();
+            buffer.clear();
+            // 关闭中
+            if (readNum == -1){
+                tcpSession.setStatus(TCPSession.SESSION_STATUS_CLOSING);
+            }
             if (tcpSession.status == TCPSession.SESSION_STATUS_CLOSING) {
                 log.info(tcpSession.getRemoteAddress() + " read ...close..... ");
                 key.channel().close(); // 关闭后, 如果未接收数据
                 key.cancel();
-            }
-
-            // 压缩读缓冲区
-            buffer.compact();
-            buffer.clear();
-            if (readNum == -1){
-                tcpSession.setStatus(TCPSession.SESSION_STATUS_CLOSING);
+                // 更新状态为已关闭
+                tcpSession.setStatus(TCPSession.SESSION_STATUS_CLOSED);
+                // 事件回调
+                handler.onClose();
                 return;
             }
-//             读完数据后，为 SelectionKey 注册可写事件
+
+            // 读完数据后，为 SelectionKey 注册可写事件
             if (!isInterest(key, SelectionKey.OP_WRITE)) {
                 key.interestOps(key.interestOps() + SelectionKey.OP_WRITE);
             }
@@ -134,5 +139,9 @@ public class TCPSelectorIO<T> implements BaseIO<SelectionKey, TCPSession> {
             // 写回调
             handler.writeable();
         }
+    }
+
+    public void setHandlerMap(SelectableChannel channel, BaseEventHandler<T> handler) {
+        this.handlerMap.put(channel, handler);
     }
 }

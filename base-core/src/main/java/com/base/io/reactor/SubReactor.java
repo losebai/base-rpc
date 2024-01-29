@@ -24,28 +24,32 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 @Getter
 @Slf4j
-public class SubReactor<T> extends TCPSelectorIO<T> implements Runnable, SocketServer {
+public class SubReactor<T> implements Runnable, SocketServer {
 
 
     private final Selector selector;
     private final Queue<Event> eventQueue = new ConcurrentLinkedQueue<>();
 
+    private final TCPSelectorIO<T> selectorIO;
+
 
     private volatile byte status = BaseConstants.status.INIT;
 
     public SubReactor(IOBaseProtocol<T> protocol, TCPProcessor<T> processor) throws IOException {
-        super(protocol, processor);
         selector = SelectorProvider.provider().openSelector();
+        this.selectorIO = new TCPSelectorIO<T>(protocol, processor);
     }
 
     public void registerNewClient(SocketChannel client) throws IOException {
         client.configureBlocking(false); // 非阻塞
         TCPSession tcpSession = new TCPSession(client, ByteBuffer.allocate(Config.READ_BUFFER_SIZE), ByteBuffer.allocate(Config.WRITE_BUFFER_SIZE));
-        BaseEventHandler<T> baseEventHandler = new TCPEventHandler<T>(tcpSession);
-        handlerMap.put(client, baseEventHandler); // 后期可以处理多个handler
+        BaseEventHandler<T> baseEventHandler = new DefaultEventHandler<T>(tcpSession);
+        selectorIO.handlerMap.put(client, baseEventHandler); // 后期可以处理多个handler
         // 将socket 注册到 从上 设置成可读
-        client.register(selector, SelectionKey.OP_READ, tcpSession);
+        SelectionKey selectionKey = client.register(selector, SelectionKey.OP_READ, tcpSession);
         selector.wakeup();  // 唤醒 Selector
+        // io链接回调
+        selectorIO.connect(selectionKey, tcpSession);
         log.info(selector.selectedKeys().toString());
     }
 
@@ -74,26 +78,24 @@ public class SubReactor<T> extends TCPSelectorIO<T> implements Runnable, SocketS
                     SelectionKey key = iterator.next();
                     iterator.remove();
                     TCPSession tcpSession = (TCPSession) key.attachment(); // 对应注册时，传入的对象 第一次连接后，
-                    // io链接回调
-                    super.connect(key, tcpSession);
                     try {
                         // 分配给 SubReactor 处理的事件
-                        log.info(key.channel() + " handler... ");
+                        log.info(key.toString() + " handler... ");
                         // io处理回调
-                        super.handler(key, tcpSession);
+                        selectorIO.handler(key, tcpSession);
                     } catch (IOException e) {
                         log.error(e.getMessage());
                         key.cancel(); // 取消注册
                         if (key.channel() != null)
                             key.channel().close();
                         // io 异常处理
-                        super.error(key, tcpSession);
+                        selectorIO.error(key, tcpSession);
                         throw e;
                     }
                     if (tcpSession.status == TCPSession.SESSION_STATUS_CLOSED){
                         key.cancel();
                         // io 链接关闭
-                        super.close(key, tcpSession);
+                        selectorIO.close(key, tcpSession);
                         break;
                     }
                 }

@@ -22,7 +22,7 @@ public abstract class BaseEventHandler<T> implements EventHandler<T> {
 
     public BaseEventHandler()  {}
 
-    public abstract void process(T t);
+    public abstract T process(T t);
 
     public Map<String, CompletableFuture<BaseProtocol>> getSyncRespMap() {
         return syncRespMap;
@@ -40,6 +40,7 @@ public abstract class BaseEventHandler<T> implements EventHandler<T> {
     /**
      * 可读回调
      */
+    @Override
     public void readable(ByteBuffer buffer){
 
     }
@@ -48,6 +49,7 @@ public abstract class BaseEventHandler<T> implements EventHandler<T> {
     /**
      * 可写回调
      */
+    @Override
     public void writeable(){
 
 

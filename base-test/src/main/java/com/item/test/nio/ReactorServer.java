@@ -34,6 +34,9 @@ public class ReactorServer {
             }
             readBuffer.mark();
             int length = readBuffer.getInt();
+            if (length == 0){
+                return null;
+            }
             //消息长度超过缓冲区容量引发的半包,启用定长消息解码器,本次解码失败
             if (length + Integer.BYTES > readBuffer.capacity()) {
                 FixedLengthFrameDecoder fixedLengthFrameDecoder = new FixedLengthFrameDecoder(length);

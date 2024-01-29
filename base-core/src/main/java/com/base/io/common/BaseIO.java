@@ -46,8 +46,10 @@ public interface BaseIO<T, Session> {
     void error(T t, Session session);
 
     /**
-     * @param selectionKey
-     * @param event
+     * 是利息
+     *
+     * @param selectionKey 选择关键
+     * @param event        事件
      * @return boolean
      */
     default boolean isInterest(SelectionKey selectionKey, int event) {

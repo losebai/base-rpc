@@ -1,5 +1,7 @@
 package com.base.io.common;
 
+import java.nio.ByteBuffer;
+
 /**
  * 事件处理程序
  * 处理程序
@@ -19,7 +21,7 @@ public interface EventHandler<T> {
      *
      * @param t t
      */
-    void process(T t);
+    T process(T t);
 
     /**
      * 在开放
@@ -34,6 +36,20 @@ public interface EventHandler<T> {
      * @param t t
      */
     void onMessage(T t);
+
+
+    /**
+     * 可读
+     *
+     * @param buffer 缓冲
+     */
+    void readable(ByteBuffer buffer);
+
+
+    /**
+     * 可写
+     */
+    void writeable();
 
 
     /**

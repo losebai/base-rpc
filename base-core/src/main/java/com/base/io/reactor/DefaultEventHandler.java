@@ -10,40 +10,41 @@ import org.slf4j.LoggerFactory;
  * @author bai
  * @date 2024/01/27
  */
-public class TCPEventHandler<T> extends BaseEventHandler<T> {
+public class DefaultEventHandler<T> extends BaseEventHandler<T> {
 
-    private static final Logger log = LoggerFactory.getLogger(TCPEventHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultEventHandler.class);
 
     private final TCPSession tcpSession;
 
-    public TCPEventHandler(TCPSession tcpSession){
+    public DefaultEventHandler(TCPSession tcpSession){
         this.tcpSession = tcpSession;
     }
 
     @Override
     public void onConnect() {
-        log.info("TCPEventHandler onConnect");
+        log.info("DefaultEventHandler onConnect");
     }
 
     @Override
-    public void process(T b) {
+    public T process(T b) {
         // todo TCP事件处理
-        log.info("TCPEventHandler process");
+        log.info("DefaultEventHandler process");
+        return b;
     }
 
     @Override
     public void onOpen(T aByte) {
-        log.info("TCPEventHandler onOpen");
+        log.info("DefaultEventHandler onOpen");
     }
 
     @Override
     public void onMessage(T aByte) {
-        log.info("TCPEventHandler onMessage");
+        log.info("DefaultEventHandler onMessage");
     }
 
     @Override
     public void onClose() {
-        log.info("TCPEventHandler onClose");
+        log.info("DefaultEventHandler onClose");
     }
 
 
