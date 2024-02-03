@@ -4,6 +4,59 @@
 smart-socket(aio) + 主多从分类reactor(nio) + protobuf
 
 #### 快速入门
+
+### 事件处理
+为io处理提供了多个回调
+```java
+public interface EventHandler<T> {
+    /**
+     * 连接回调
+     */
+    void onConnect();
+
+    /**
+     * 过程
+     *
+     * @param t t
+     */
+    T process(T t);
+
+    /**
+     * 打开回调
+     *
+     * @param t t
+     */
+    void onOpen(T t);
+
+    /**
+     * 在消息
+     *
+     * @param t t
+     */
+    void onMessage(T t);
+
+
+    /**
+     * 可读回调
+     *
+     * @param buffer 缓冲
+     */
+    void readable(ByteBuffer buffer);
+
+
+    /**
+     * 可写回调
+     */
+    void writeable();
+
+
+    /**
+     * 在关闭
+     */
+    void onClose();
+
+}
+```
 #### nio-reactor
 
 ##### 服务端

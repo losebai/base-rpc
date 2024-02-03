@@ -2,7 +2,6 @@ package com.item.test.nio;
 
 import com.base.core.Protocol.IOBaseProtocol;
 import com.base.core.decoder.FixedLengthFrameDecoder;
-import com.base.io.common.Config;
 import com.base.io.common.TCPProcessor;
 import com.base.io.reactor.ReactorSocketServer;
 import com.base.io.reactor.TCPSession;
