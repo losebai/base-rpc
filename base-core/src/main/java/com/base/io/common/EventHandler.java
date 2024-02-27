@@ -23,12 +23,6 @@ public interface EventHandler<T> {
      */
     T process(T t);
 
-    /**
-     * 在开放
-     *
-     * @param t t
-     */
-    void onOpen(T t);
 
     /**
      * 在消息

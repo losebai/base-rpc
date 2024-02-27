@@ -32,10 +32,6 @@ public class DefaultEventHandler<T> extends BaseEventHandler<T> {
         return b;
     }
 
-    @Override
-    public void onOpen(T aByte) {
-        log.info("DefaultEventHandler onOpen");
-    }
 
     @Override
     public void onMessage(T aByte) {
